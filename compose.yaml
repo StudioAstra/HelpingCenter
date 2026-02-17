@@ -11,7 +11,7 @@ services:
       database:
         condition: service_healthy
     environment:
-      DATABASE_URL: "mysql://helpcenter:helpcenter@database:3306/helpcenter?serverVersion=8.0.32&charset=utf8mb4"
+      DATABASE_URL: "mysql://helpcenter:helpcenter@database:3306/helpcenter?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
       APP_ENV: dev
       APP_SECRET: "change-me-in-production"
 
@@ -26,18 +26,18 @@ services:
       - php
 
   database:
-    image: mysql:8.0
+    image: mariadb:10.11
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: helpcenter
-      MYSQL_USER: helpcenter
-      MYSQL_PASSWORD: helpcenter
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: helpcenter
+      MARIADB_USER: helpcenter
+      MARIADB_PASSWORD: helpcenter
     ports:
       - "${DB_PORT:-3306}:3306"
     volumes:
       - database_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       timeout: 5s
       retries: 10
       start_period: 30s
