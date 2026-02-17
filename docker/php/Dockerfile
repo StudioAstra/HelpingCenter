@@ -5,6 +5,8 @@ RUN apk add --no-cache \
     icu-dev \
     libzip-dev \
     linux-headers \
+    nodejs \
+    npm \
     $PHPIZE_DEPS
 
 # Install PHP extensions
