@@ -1,7 +1,5 @@
-
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    ports:
-      - "5432"
-###< doctrine/doctrine-bundle ###
+  # In dev, run Webpack watch for live asset rebuilds
+  node:
+    command: sh -c "npm install && npm run watch"
+    profiles: []

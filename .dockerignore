@@ -1,0 +1,11 @@
+node_modules/
+vendor/
+var/
+public/build/
+.git/
+.env.local
+.env.*.local
+docker/
+compose.yaml
+compose.override.yaml
+PLAN.md
