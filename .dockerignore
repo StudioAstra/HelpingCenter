@@ -5,7 +5,7 @@ public/build/
 .git/
 .env.local
 .env.*.local
-docker/
+docker/nginx/
 compose.yaml
 compose.override.yaml
 PLAN.md
