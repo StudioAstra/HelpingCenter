@@ -43,9 +43,9 @@ jobs:
             --exclude='node_modules/' \
             --exclude='vendor/' \
             ./ \
-            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/production/
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/helpingcenter/
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} '
-            cd /var/www/production
+            cd /var/www/helpingcenter
             composer install --no-dev --optimize-autoloader --no-interaction
             if [ -f package.json ]; then
               npm ci
