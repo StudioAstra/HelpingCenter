@@ -23,9 +23,9 @@
             {% endif %}
         </div>
         <div>
-            <h1 class="font-satoshi text-3xl font-extrabold text-[#2d3748]">{{ section.title }}</h1>
+            <h1 class="font-satoshi text-3xl font-extrabold text-[#1f2937]">{{ section.title }}</h1>
             {% if section.description is defined and section.description %}
-                <p class="mt-2 text-base text-[#2d3748]/60">{{ section.description }}</p>
+                <p class="mt-2 text-base text-[#2d3748]/80">{{ section.description }}</p>
             {% endif %}
         </div>
     </div>
@@ -34,18 +34,18 @@
 {# ── Subsection Cards Grid ── #}
 <section class="mx-auto max-w-7xl px-4 py-8">
     {% if sectionArticles is defined and sectionArticles|length > 0 %}
-        <div class="mb-8 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm">
-            <h2 class="font-satoshi text-xl font-bold text-[#2d3748]">Articles de cette section</h2>
+        <div class="mb-8 rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white p-6 shadow-sm">
+            <h2 class="font-satoshi text-xl font-bold text-[#1f2937]">Articles de cette section</h2>
             <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {% for article in sectionArticles %}
                     <a href="{{ path('front_article_section', {sectionSlug: section.slug, articleSlug: article.slug}) }}"
-                       class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
-                        <div class="text-xs font-medium text-[#2d3748]/40">Section</div>
-                        <h3 class="mt-1 font-satoshi text-base font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                       class="group block rounded-xl border border-[rgba(0,0,0,0.10)] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/30 hover:shadow-sm">
+                        <div class="text-xs font-medium text-[#2d3748]/65">Section</div>
+                        <h3 class="mt-1 font-satoshi text-base font-bold text-[#1f2937] group-hover:text-[#635bff]">
                             {{ article.title }}
                         </h3>
                         {% if article.searchText %}
-                            <p class="mt-2 text-sm text-[#2d3748]/60">
+                            <p class="mt-2 text-sm text-[#2d3748]/80">
                                 {{ article.searchText|length > 120 ? article.searchText|slice(0, 120) ~ '...' : article.searchText }}
                             </p>
                         {% endif %}
@@ -58,32 +58,32 @@
     {% if section.subsections|length > 0 %}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {% for sub in section.subsections %}
-                <div class="rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
                     {% set publishedSubArticles = sub.articles|filter(a => a.isPublished) %}
                     <a href="{{ path('front_subsection', {sectionSlug: section.slug, subsectionSlug: sub.slug}) }}"
                        class="block">
-                        <h2 class="font-satoshi text-lg font-bold text-[#2d3748] hover:text-[#635bff]">
+                        <h2 class="font-satoshi text-lg font-bold text-[#1f2937] hover:text-[#635bff]">
                             {{ sub.title }}
                         </h2>
                     </a>
                     {% if sub.description is defined and sub.description %}
-                        <p class="mt-1 text-sm text-[#2d3748]/60">{{ sub.description }}</p>
+                        <p class="mt-1 text-sm text-[#2d3748]/80">{{ sub.description }}</p>
                     {% endif %}
-                    <p class="mt-3 text-xs font-medium text-[#2d3748]/40">
+                    <p class="mt-3 text-xs font-medium text-[#2d3748]/65">
                         {{ publishedSubArticles|length }} article{{ publishedSubArticles|length > 1 ? 's' : '' }}
                     </p>
 
                     {# Article Cards #}
                     {% if publishedSubArticles|length > 0 %}
-                        <div class="mt-4 grid grid-cols-1 gap-3 border-t border-[rgba(0,0,0,0.06)] pt-3">
+                        <div class="mt-4 grid grid-cols-1 gap-3 border-t border-[rgba(0,0,0,0.10)] pt-3">
                             {% for article in publishedSubArticles %}
                                 <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: sub.slug, articleSlug: article.slug}) }}"
-                                   class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
-                                    <h3 class="font-satoshi text-sm font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                                   class="group block rounded-xl border border-[rgba(0,0,0,0.10)] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/30 hover:shadow-sm">
+                                    <h3 class="font-satoshi text-sm font-bold text-[#1f2937] group-hover:text-[#635bff]">
                                         {{ article.title }}
                                     </h3>
                                     {% if article.searchText %}
-                                        <p class="mt-1 text-xs text-[#2d3748]/60">
+                                        <p class="mt-1 text-xs text-[#2d3748]/80">
                                             {{ article.searchText|length > 90 ? article.searchText|slice(0, 90) ~ '...' : article.searchText }}
                                         </p>
                                     {% endif %}
@@ -96,7 +96,7 @@
         </div>
     {% else %}
         <div class="py-16 text-center">
-            <p class="text-lg text-[#2d3748]/50">Aucune sous-section pour le moment.</p>
+            <p class="text-lg text-[#2d3748]/75">Aucune sous-section pour le moment.</p>
         </div>
     {% endif %}
 </section>

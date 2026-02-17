@@ -209,6 +209,7 @@ class HelpZipImporter
         $section->setSlug($slug);
         $section->setPosition($maxPosition + 1);
         $this->em->persist($section);
+        $this->em->flush();
         $createdSections++;
 
         return $section;
@@ -244,6 +245,7 @@ class HelpZipImporter
         $subsection->setSlug($slug);
         $subsection->setPosition($maxPosition + 1);
         $this->em->persist($subsection);
+        $this->em->flush();
         $createdSubsections++;
 
         return $subsection;

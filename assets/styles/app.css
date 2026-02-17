@@ -189,5 +189,6 @@
 
 /* TOC active state */
 .toc-link.active {
-  @apply pl-2 text-blue-brand font-bold border-l-2 border-blue-brand;
+  @apply text-blue-brand font-semibold border-l-2 border-blue-brand;
+  background: rgba(99, 91, 255, 0.12);
 }

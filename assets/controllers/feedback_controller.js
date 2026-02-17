@@ -1,7 +1,7 @@
 import { Controller } from '@hotwired/stimulus';
 
 export default class extends Controller {
-    static targets = ['question', 'negativeForm', 'thankYou', 'comment'];
+    static targets = ['question', 'negativeForm', 'thankYou', 'comment', 'reason'];
     static values = { url: String };
 
     async vote(event) {
@@ -18,14 +18,22 @@ export default class extends Controller {
 
     async submitNegative(event) {
         event.preventDefault();
+        const reason = this.hasReasonTarget ? this.reasonTarget.value.trim() : '';
         const comment = this.commentTarget.value.trim();
-        await this.submit(false, comment || null);
+        let payloadComment = comment;
+        if (reason) {
+            payloadComment = comment ? `[${reason}] ${comment}` : `[${reason}]`;
+        }
+        await this.submit(false, payloadComment || null);
     }
 
     cancel() {
         this.negativeFormTarget.classList.add('hidden');
         this.questionTarget.classList.remove('hidden');
         this.commentTarget.value = '';
+        if (this.hasReasonTarget) {
+            this.reasonTarget.value = '';
+        }
     }
 
     async submit(isHelpful, comment) {

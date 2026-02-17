@@ -4,7 +4,7 @@
 
 {% block body %}
 {# ── Hero Section ── #}
-<section class="relative overflow-hidden bg-gradient-to-br from-[#635bff]/10 via-[#f0f4f8] to-[#fafbfc] py-16 md:py-24">
+<section class="relative overflow-visible bg-gradient-to-br from-[#635bff]/10 via-[#f0f4f8] to-[#fafbfc] py-16 md:py-24">
     <div class="mx-auto max-w-3xl px-4 text-center">
         <h1 class="font-satoshi text-4xl font-extrabold tracking-tight text-[#2d3748] md:text-5xl">
             Centre d'aide StudioAstra
@@ -14,7 +14,7 @@
         </p>
 
         {# ── Search Bar ── #}
-        <div class="relative mt-8" data-controller="search">
+        <div class="relative z-30 mt-8" data-controller="search">
             <div class="relative">
                 <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-[#2d3748]/40">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -24,7 +24,7 @@
                 <input
                     type="text"
                     placeholder="Rechercher dans le centre d'aide..."
-                    class="w-full rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white py-4 pl-12 pr-4 text-[#2d3748] shadow-sm placeholder:text-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/40"
+                    class="w-full rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white py-4 pl-12 pr-4 text-[#1f2937] shadow-sm placeholder:text-[#2d3748]/55 focus:outline-none focus:ring-2 focus:ring-[#635bff]/40"
                     data-search-target="input"
                     data-action="input->search#onInput focus->search#onFocus"
                 />
@@ -32,21 +32,32 @@
 
             {# ── Search Results Dropdown ── #}
             <div
-                class="absolute left-0 right-0 z-50 mt-2 hidden max-h-96 overflow-y-auto rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white shadow-lg"
+                class="absolute left-0 right-0 z-[70] mt-2 hidden max-h-96 overflow-y-auto rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white shadow-lg"
                 data-search-target="results"
             ></div>
         </div>
     </div>
 </section>
 
+<section class="mx-auto max-w-7xl px-4 pt-8" data-controller="recent-articles">
+    <div class="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-[#fafbfc] p-5">
+        <h2 class="font-satoshi text-lg font-bold text-[#1f2937]">Récemment consultés</h2>
+        <p class="mt-1 text-sm text-[#2d3748]/75">Retrouvez rapidement les derniers articles ouverts.</p>
+        <div data-recent-articles-target="list" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"></div>
+        <p data-recent-articles-target="empty" class="hidden mt-4 text-sm text-[#2d3748]/65">
+            Aucun article consulté récemment.
+        </p>
+    </div>
+</section>
+
 {# ── Section Cards Grid ── #}
 <section class="mx-auto max-w-7xl px-4 py-12 md:py-16">
     {% if sections is defined and sections|length > 0 %}
-        <div class="space-y-8">
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
             {% for section in sections %}
                 {% set sectionArticles = articlesBySection[section.id] ?? [] %}
-                <div class="rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm">
-                    <div class="mb-6 flex items-start gap-4">
+                <div class="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white p-6 shadow-sm flex flex-col h-full">
+                    <div class="mb-5 flex items-start gap-4">
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#635bff]/10 text-[#635bff]">
                             {% if section.icon is defined and section.icon %}
                                 <span class="text-2xl">{{ section.icon }}</span>
@@ -58,48 +69,57 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <a href="{{ path('front_section', {sectionSlug: section.slug}) }}"
-                               class="font-satoshi text-xl font-bold text-[#2d3748] hover:text-[#635bff]">
+                               class="font-satoshi text-xl font-bold text-[#1f2937] hover:text-[#635bff]">
                                 {{ section.title }}
                             </a>
                             {% if section.description is defined and section.description %}
-                                <p class="mt-1 text-sm text-[#2d3748]/60">{{ section.description }}</p>
+                                <p class="mt-1 text-sm text-[#2d3748]/80">{{ section.description }}</p>
                             {% endif %}
-                            <p class="mt-3 text-xs font-medium text-[#2d3748]/40">
+                            <p class="mt-3 text-xs font-medium text-[#2d3748]/65">
                                 {{ sectionArticles|length }} article{{ sectionArticles|length > 1 ? 's' : '' }}
                             </p>
                         </div>
                     </div>
 
                     {% if sectionArticles|length > 0 %}
-                        <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                            {% for article in sectionArticles %}
+                        {% set previewArticles = sectionArticles|slice(0, 4) %}
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {% for article in previewArticles %}
                                 <a href="{{ article.subsection
                                     ? path('front_article', {sectionSlug: section.slug, subsectionSlug: article.subsection.slug, articleSlug: article.slug})
                                     : path('front_article_section', {sectionSlug: section.slug, articleSlug: article.slug}) }}"
-                                   class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
-                                    <div class="text-xs font-medium text-[#2d3748]/40">
+                                   class="group block rounded-xl border border-[rgba(0,0,0,0.10)] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/30 hover:shadow-sm">
+                                    <div class="text-xs font-medium text-[#2d3748]/65">
                                         {{ article.subsection ? article.subsection.title : 'Section' }}
                                     </div>
-                                    <h3 class="mt-1 font-satoshi text-base font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                                    <h3 class="mt-1 font-satoshi text-base font-bold text-[#1f2937] group-hover:text-[#635bff]">
                                         {{ article.title }}
                                     </h3>
                                     {% if article.searchText %}
-                                        <p class="mt-2 text-sm text-[#2d3748]/60">
+                                        <p class="mt-2 text-sm text-[#2d3748]/80">
                                             {{ article.searchText|length > 120 ? article.searchText|slice(0, 120) ~ '...' : article.searchText }}
                                         </p>
                                     {% endif %}
                                 </a>
                             {% endfor %}
                         </div>
+                        {% if sectionArticles|length > 4 %}
+                            <div class="mt-4">
+                                <a href="{{ path('front_section', {sectionSlug: section.slug}) }}"
+                                   class="inline-flex items-center text-sm font-medium text-[#635bff] hover:text-[#4f46e5] transition-colors">
+                                    Voir toute la catégorie
+                                </a>
+                            </div>
+                        {% endif %}
                     {% else %}
-                        <p class="text-sm text-[#2d3748]/50">Aucun article publié pour cette section.</p>
+                        <p class="text-sm text-[#2d3748]/75">Aucun article publié pour cette section.</p>
                     {% endif %}
                 </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="py-16 text-center">
-            <p class="text-lg text-[#2d3748]/50">Aucun contenu pour le moment.</p>
+            <p class="text-lg text-[#2d3748]/75">Aucun contenu pour le moment.</p>
         </div>
     {% endif %}
 </section>
