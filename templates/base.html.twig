@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Centre d'aide{% endblock %} — StudioAstra</title>
+    <meta name="description" content="{% block meta_description %}Centre d'aide StudioAstra — Trouvez toutes les informations pour configurer votre compte.{% endblock %}">
+    <meta property="og:title" content="{{ block('title') }}">
+    <meta property="og:description" content="{{ block('meta_description') }}">
+    <meta property="og:type" content="website">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ app.request.uri }}">
+    <link rel="preconnect" href="https://api.fontshare.com">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+</head>
+<body class="min-h-screen flex flex-col">
+    {% block navbar %}
+        {% include 'components/navbar.html.twig' %}
+    {% endblock %}
+
+    <main class="flex-1">
+        {% block body %}{% endblock %}
+    </main>
+
+    {% block footer %}
+        {% include 'components/footer.html.twig' %}
+    {% endblock %}
+</body>
+</html>

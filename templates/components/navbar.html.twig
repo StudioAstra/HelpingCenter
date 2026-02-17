@@ -1,0 +1,99 @@
+{# components/navbar.html.twig — Barre de navigation publique #}
+<nav class="sticky top-0 z-50 bg-[#ffffff] border-b border-[rgba(0,0,0,0.06)] backdrop-blur-sm"
+     data-controller="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+
+            {# --- Gauche : Logo + badge --- #}
+            <div class="flex items-center gap-3">
+                <a href="{{ path('app_home') }}" class="flex items-center gap-2 group">
+                    <span class="text-xl font-bold text-[#2d3748] tracking-tight group-hover:text-[#635bff] transition-colors">
+                        StudioAstra
+                    </span>
+                    <span class="inline-flex items-center rounded-full bg-[#f0f4f8] px-2.5 py-0.5 text-xs font-medium text-[#635bff]">
+                        Centre d'aide
+                    </span>
+                </a>
+            </div>
+
+            {# --- Droite : Recherche + lien retour (desktop) --- #}
+            <div class="hidden md:flex items-center gap-4">
+                {# Barre de recherche compacte #}
+                <div class="relative" data-controller="search">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2d3748]/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                        <input
+                            type="search"
+                            placeholder="Rechercher..."
+                            class="w-64 rounded-2xl bg-[#f0f4f8] border-none pl-10 pr-4 py-2 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 transition-all"
+                            data-search-target="input"
+                            data-action="input->search#onInput keydown->search#onKeydown"
+                        >
+                    </div>
+                    {# Conteneur des resultats de recherche #}
+                    <div class="absolute top-full left-0 right-0 mt-2 bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(0,0,0,0.06)] hidden overflow-hidden"
+                         data-search-target="results">
+                    </div>
+                </div>
+
+                {# Lien retour application #}
+                <a href="#"
+                   class="inline-flex items-center gap-1.5 text-sm font-medium text-[#2d3748]/60 hover:text-[#635bff] transition-colors">
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                    </svg>
+                    Retour a l'application
+                </a>
+            </div>
+
+            {# --- Bouton hamburger (mobile) --- #}
+            <div class="md:hidden">
+                <button type="button"
+                        class="inline-flex items-center justify-center rounded-xl p-2 text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors"
+                        data-action="navbar#toggleMenu"
+                        aria-label="Ouvrir le menu">
+                    <svg class="h-6 w-6" data-navbar-target="iconOpen" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <svg class="h-6 w-6 hidden" data-navbar-target="iconClose" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {# --- Menu mobile --- #}
+    <div class="md:hidden hidden border-t border-[rgba(0,0,0,0.06)]"
+         data-navbar-target="mobileMenu">
+        <div class="px-4 py-4 space-y-3">
+            {# Recherche mobile #}
+            <div class="relative" data-controller="search">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2d3748]/40" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <input
+                    type="search"
+                    placeholder="Rechercher..."
+                    class="w-full rounded-2xl bg-[#f0f4f8] border-none pl-10 pr-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30"
+                    data-search-target="input"
+                    data-action="input->search#onInput keydown->search#onKeydown"
+                >
+                <div class="absolute top-full left-0 right-0 mt-2 bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(0,0,0,0.06)] hidden overflow-hidden"
+                     data-search-target="results">
+                </div>
+            </div>
+
+            {# Lien retour #}
+            <a href="#"
+               class="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#635bff] transition-colors">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                </svg>
+                Retour a l'application
+            </a>
+        </div>
+    </div>
+</nav>

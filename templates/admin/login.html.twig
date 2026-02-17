@@ -1,0 +1,106 @@
+{# admin/login.html.twig — Page de connexion administration
+   Etend base.html.twig, supprime navbar et footer.
+   Carte centree avec formulaire email/mot de passe.
+#}
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{# Supprime la navbar et le footer #}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block body %}
+<div class="min-h-screen flex items-center justify-center bg-[#fafbfc] px-4">
+    <div class="w-full max-w-md">
+
+        {# Logo / Marque #}
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold text-[#2d3748] tracking-tight">
+                StudioAstra
+            </h1>
+            <p class="mt-1 text-sm text-[#2d3748]/50">
+                Centre d'aide
+            </p>
+        </div>
+
+        {# Carte de connexion #}
+        <div class="bg-[#ffffff] rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-8">
+
+            <h2 class="text-lg font-semibold text-[#2d3748] text-center mb-6">
+                Connexion administration
+            </h2>
+
+            {# Messages d'erreur #}
+            {% if error %}
+                <div class="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            {# Messages flash #}
+            {% for message in app.flashes('error') %}
+                <div class="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {# Formulaire #}
+            <form method="post" class="space-y-5">
+
+                {# Email #}
+                <div>
+                    <label for="inputEmail" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Adresse e-mail
+                    </label>
+                    <input
+                        type="email"
+                        id="inputEmail"
+                        name="email"
+                        value="{{ last_username|default('') }}"
+                        required
+                        autofocus
+                        autocomplete="email"
+                        placeholder="admin@studioastra.com"
+                        class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all"
+                    >
+                </div>
+
+                {# Mot de passe #}
+                <div>
+                    <label for="inputPassword" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Mot de passe
+                    </label>
+                    <input
+                        type="password"
+                        id="inputPassword"
+                        name="password"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Votre mot de passe"
+                        class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all"
+                    >
+                </div>
+
+                {# Token CSRF #}
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                {# Bouton de connexion #}
+                <button type="submit"
+                        class="btn btn-primary w-full flex items-center justify-center rounded-xl bg-[#635bff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
+                    Se connecter
+                </button>
+
+            </form>
+        </div>
+
+        {# Lien retour #}
+        <p class="mt-6 text-center text-xs text-[#2d3748]/40">
+            <a href="{{ path('app_home') }}" class="hover:text-[#635bff] transition-colors">
+                Retour au centre d'aide
+            </a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}

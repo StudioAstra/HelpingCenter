@@ -1,0 +1,107 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ article.title }} — Centre d'aide StudioAstra{% endblock %}
+{% block meta_description %}{{ article.searchText is defined and article.searchText ? article.searchText|slice(0, 160) : 'Article d\'aide StudioAstra : ' ~ article.title }}{% endblock %}
+
+{% block body %}
+{# ── Breadcrumbs ── #}
+{% include 'components/breadcrumbs.html.twig' with {breadcrumbs: [
+    {label: 'Accueil', url: path('front_home')},
+    {label: section.title, url: path('front_section', {sectionSlug: section.slug})},
+    {label: subsection.title, url: path('front_subsection', {sectionSlug: section.slug, subsectionSlug: subsection.slug})},
+    {label: article.title, url: null}
+]} %}
+
+{# ── Two-Column Layout ── #}
+<section class="mx-auto max-w-7xl px-4 py-8">
+    <div class="flex flex-col gap-8 lg:flex-row">
+
+        {# ── Left Column: Main Content ── #}
+        <article class="min-w-0 flex-1">
+            {# Article Title #}
+            <h1 class="font-satoshi text-3xl font-extrabold leading-tight text-[#2d3748] md:text-4xl">
+                {{ article.title }}
+            </h1>
+
+            {# Meta #}
+            <p class="mt-3 text-sm text-[#2d3748]/40">
+                Mis à jour le {{ article.updatedAt|date('d/m/Y') }}
+            </p>
+
+            {# Article Body #}
+            <div class="article-content mt-8 prose prose-slate max-w-none
+                        prose-headings:font-satoshi prose-headings:font-bold prose-headings:text-[#2d3748]
+                        prose-p:text-[#2d3748]/80 prose-p:leading-relaxed
+                        prose-a:text-[#635bff] prose-a:no-underline hover:prose-a:underline
+                        prose-strong:text-[#2d3748]
+                        prose-code:rounded prose-code:bg-[#f0f4f8] prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:text-[#635bff]
+                        prose-pre:rounded-2xl prose-pre:bg-[#2d3748] prose-pre:text-sm
+                        prose-img:rounded-2xl
+                        prose-blockquote:border-[#635bff]/30 prose-blockquote:text-[#2d3748]/70
+                        prose-li:text-[#2d3748]/80">
+                {{ htmlContent|raw }}
+            </div>
+
+            {# ── Feedback Widget ── #}
+            <div class="mt-12">
+                {% include 'components/feedback.html.twig' %}
+            </div>
+
+            {# ── Previous / Next Navigation ── #}
+            {% if siblings is defined and siblings|length > 0 %}
+                {% set previousArticle = null %}
+                {% set nextArticle = null %}
+                {% set found = false %}
+
+                {% for sibling in siblings %}
+                    {% if found and nextArticle is null %}
+                        {% set nextArticle = sibling %}
+                    {% endif %}
+                    {% if sibling.id == article.id %}
+                        {% set found = true %}
+                    {% endif %}
+                    {% if not found %}
+                        {% set previousArticle = sibling %}
+                    {% endif %}
+                {% endfor %}
+
+                <nav class="mt-10 flex items-center justify-between border-t border-[rgba(0,0,0,0.06)] pt-6">
+                    {# Previous #}
+                    {% if previousArticle %}
+                        <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: previousArticle.slug}) }}"
+                           class="group flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#2d3748]/70 transition hover:bg-[#f0f4f8] hover:text-[#635bff]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                            <span>{{ previousArticle.title }}</span>
+                        </a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+
+                    {# Next #}
+                    {% if nextArticle %}
+                        <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: nextArticle.slug}) }}"
+                           class="group flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#2d3748]/70 transition hover:bg-[#f0f4f8] hover:text-[#635bff]">
+                            <span>{{ nextArticle.title }}</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    {% else %}
+                        <span></span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        </article>
+
+        {# ── Right Column: Table of Contents Sidebar ── #}
+        <aside class="hidden w-72 shrink-0 lg:block">
+            <div class="sticky top-8">
+                {% include 'components/toc.html.twig' with {headings: headings} %}
+            </div>
+        </aside>
+
+    </div>
+</section>
+{% endblock %}

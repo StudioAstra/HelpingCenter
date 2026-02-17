@@ -1,0 +1,30 @@
+{# components/toc.html.twig — Table des matieres laterale
+   Attend une variable `headings` : tableau de {id, text, level}
+   Utilise un controleur Stimulus "toc" pour le scroll-spy.
+#}
+{% if headings is defined and headings|length > 0 %}
+<aside class="sticky top-24 hidden lg:block" data-controller="toc">
+    <div class="pl-4 border-l-2 border-[#f0f4f8]">
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-[#2d3748]/40 mb-4">
+            Sur cette page
+        </h4>
+
+        <nav aria-label="Table des matieres">
+            <ul class="space-y-2">
+                {% for heading in headings %}
+                    <li>
+                        <a href="#{{ heading.id }}"
+                           class="toc-link block text-sm leading-relaxed transition-colors duration-200
+                                  {{ heading.level == 3 ? 'pl-3' : '' }}
+                                  text-[#2d3748]/50 hover:text-[#635bff]"
+                           data-toc-target="link"
+                           data-toc-id-param="{{ heading.id }}">
+                            {{ heading.text }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</aside>
+{% endif %}

@@ -1,0 +1,51 @@
+{# components/search_bar.html.twig — Barre de recherche pleine largeur (page d'accueil)
+   Version grande avec icone loupe, resultats en dropdown.
+   Controleur Stimulus "search" pour la recherche en direct.
+#}
+<div class="w-full max-w-2xl mx-auto" data-controller="search">
+    <div class="relative">
+        {# Icone loupe #}
+        <svg class="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#2d3748]/40 pointer-events-none"
+             xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+        </svg>
+
+        {# Champ de saisie #}
+        <input
+            type="search"
+            placeholder="Rechercher dans le centre d'aide..."
+            class="w-full rounded-2xl bg-[#ffffff] border border-[rgba(0,0,0,0.06)] pl-14 pr-5 py-4 text-base text-[#2d3748] placeholder-[#2d3748]/40 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all"
+            data-search-target="input"
+            data-action="input->search#onInput keydown->search#onKeydown focus->search#onFocus"
+            autocomplete="off"
+        >
+    </div>
+
+    {# Conteneur des resultats #}
+    <div class="relative">
+        <div class="absolute top-2 left-0 right-0 bg-[#ffffff] rounded-2xl shadow-lg border border-[rgba(0,0,0,0.06)] hidden overflow-hidden z-40"
+             data-search-target="results">
+
+            {# Indicateur de chargement #}
+            <div class="hidden px-5 py-4 text-sm text-[#2d3748]/50" data-search-target="loading">
+                <div class="flex items-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-[#635bff]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Recherche en cours...
+                </div>
+            </div>
+
+            {# Liste des resultats #}
+            <ul class="divide-y divide-[rgba(0,0,0,0.06)]" data-search-target="list">
+                {# Les resultats sont injectes ici par le controleur Stimulus #}
+            </ul>
+
+            {# Aucun resultat #}
+            <div class="hidden px-5 py-4 text-sm text-[#2d3748]/50" data-search-target="empty">
+                Aucun resultat trouve. Essayez avec d'autres termes.
+            </div>
+        </div>
+    </div>
+</div>

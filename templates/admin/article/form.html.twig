@@ -1,0 +1,134 @@
+{# admin/article/form.html.twig — Formulaire de creation / edition d'article
+   Utilise la variable `article` (null = creation, objet = edition).
+   Utilise la variable `subsections` pour le select avec optgroup par section.
+   Integre Editor.js via un Stimulus controller.
+#}
+{% extends 'admin/base.html.twig' %}
+
+{% set is_edit = article is not null %}
+
+{% block title %}{{ is_edit ? 'Modifier l\'article' : 'Nouvel article' }} — {{ parent() }}{% endblock %}
+
+{% block admin_title %}{{ is_edit ? 'Modifier l\'article' : 'Nouvel article' }}{% endblock %}
+
+{% block admin_content %}
+
+    <div class="max-w-4xl">
+        <div class="bg-[#ffffff] rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6 lg:p-8">
+
+            <h2 class="text-lg font-semibold text-[#2d3748] mb-6">
+                {{ is_edit ? 'Modifier l\'article' : 'Nouvel article' }}
+            </h2>
+
+            <form method="post"
+                  action="{{ is_edit ? path('admin_article_edit', { id: article.id }) : path('admin_article_new') }}"
+                  class="space-y-6"
+                  data-controller="editor"
+                  data-action="submit->editor#save">
+
+                {# Titre #}
+                <div>
+                    <label for="title" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Titre
+                    </label>
+                    <input type="text"
+                           id="title"
+                           name="title"
+                           value="{{ is_edit ? article.title : '' }}"
+                           required
+                           autofocus
+                           placeholder="Titre de l'article"
+                           class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                </div>
+
+                {# Sous-section (avec optgroup par section) #}
+                <div>
+                    <label for="subsection_id" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Sous-section
+                    </label>
+                    <select id="subsection_id"
+                            name="subsection_id"
+                            required
+                            class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                        <option value="">S&eacute;lectionner une sous-section</option>
+                        {% set current_section_id = null %}
+                        {% for subsection in subsections %}
+                            {% if subsection.section.id != current_section_id %}
+                                {% if current_section_id is not null %}
+                                    </optgroup>
+                                {% endif %}
+                                {% set current_section_id = subsection.section.id %}
+                                <optgroup label="{{ subsection.section.title }}">
+                            {% endif %}
+                            <option value="{{ subsection.id }}"
+                                    {{ is_edit and article.subsection.id == subsection.id ? 'selected' : '' }}>
+                                {{ subsection.title }}
+                            </option>
+                        {% endfor %}
+                        {% if current_section_id is not null %}
+                            </optgroup>
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {# Position #}
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                            Position
+                        </label>
+                        <input type="number"
+                               id="position"
+                               name="position"
+                               value="{{ is_edit ? article.position : 0 }}"
+                               min="0"
+                               class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                    </div>
+
+                    {# Publie (toggle checkbox) #}
+                    <div class="flex items-end pb-1">
+                        <label class="relative inline-flex items-center cursor-pointer gap-3">
+                            <input type="checkbox"
+                                   name="is_published"
+                                   value="1"
+                                   {{ is_edit and article.isPublished ? 'checked' : '' }}
+                                   class="sr-only peer">
+                            <div class="w-11 h-6 bg-[#f0f4f8] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#635bff]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[rgba(0,0,0,0.06)] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#635bff]"></div>
+                            <span class="text-sm font-medium text-[#2d3748]">Publi&eacute;</span>
+                        </label>
+                    </div>
+                </div>
+
+                {# Editeur de contenu (Editor.js) #}
+                <div>
+                    <label class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Contenu
+                    </label>
+                    <input type="hidden"
+                           name="content"
+                           data-editor-target="input"
+                           value="{{ is_edit ? article.content|json_encode : '{}' }}">
+                    <div data-editor-target="holder"
+                         data-editor-content-value="{{ is_edit ? article.content|json_encode|e('html_attr') : '{}' }}"
+                         data-editor-upload-url-value="{{ path('admin_upload_image') }}"
+                         class="min-h-[400px] rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-4 text-sm text-[#2d3748] focus-within:ring-2 focus-within:ring-[#635bff]/30 focus-within:border-transparent transition-all">
+                    </div>
+                </div>
+
+                {# Boutons #}
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit"
+                            class="btn btn-primary inline-flex items-center gap-2 rounded-xl bg-[#635bff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
+                        Enregistrer
+                    </button>
+                    <a href="{{ path('admin_article_index') }}"
+                       class="btn btn-outline inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,0,0.06)] px-5 py-2.5 text-sm font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
+                        Annuler
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

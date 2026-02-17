@@ -1,0 +1,113 @@
+{# admin/subsection/form.html.twig — Formulaire de creation / edition de sous-section
+   Utilise la variable `subsection` (null = creation, objet = edition).
+   Utilise la variable `sections` pour le select de la section parente.
+#}
+{% extends 'admin/base.html.twig' %}
+
+{% set is_edit = subsection is not null %}
+
+{% block title %}{{ is_edit ? 'Modifier la sous-section' : 'Nouvelle sous-section' }} — {{ parent() }}{% endblock %}
+
+{% block admin_title %}{{ is_edit ? 'Modifier la sous-section' : 'Nouvelle sous-section' }}{% endblock %}
+
+{% block admin_content %}
+
+    <div class="max-w-2xl">
+        <div class="bg-[#ffffff] rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6 lg:p-8">
+
+            <h2 class="text-lg font-semibold text-[#2d3748] mb-6">
+                {{ is_edit ? 'Modifier la sous-section' : 'Nouvelle sous-section' }}
+            </h2>
+
+            <form method="post"
+                  action="{{ is_edit ? path('admin_subsection_edit', { id: subsection.id }) : path('admin_subsection_new') }}"
+                  class="space-y-5">
+
+                {# Section parente #}
+                <div>
+                    <label for="section_id" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Section
+                    </label>
+                    <select id="section_id"
+                            name="section_id"
+                            required
+                            class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                        <option value="">S&eacute;lectionner une section</option>
+                        {% for section in sections %}
+                            <option value="{{ section.id }}"
+                                    {{ is_edit and subsection.section.id == section.id ? 'selected' : '' }}>
+                                {{ section.title }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {# Titre #}
+                <div>
+                    <label for="title" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Titre
+                    </label>
+                    <input type="text"
+                           id="title"
+                           name="title"
+                           value="{{ is_edit ? subsection.title : '' }}"
+                           required
+                           placeholder="Nom de la sous-section"
+                           class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                </div>
+
+                {# Description #}
+                <div>
+                    <label for="description" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Description
+                    </label>
+                    <textarea id="description"
+                              name="description"
+                              rows="3"
+                              placeholder="Description courte de la sous-section"
+                              class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all resize-y">{{ is_edit ? subsection.description : '' }}</textarea>
+                </div>
+
+                {# Icone #}
+                <div>
+                    <label for="icon" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Ic&ocirc;ne
+                    </label>
+                    <input type="text"
+                           id="icon"
+                           name="icon"
+                           value="{{ is_edit ? subsection.icon|default('') : '' }}"
+                           placeholder="ex: file-text"
+                           class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                </div>
+
+                {# Position #}
+                <div>
+                    <label for="position" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Position
+                    </label>
+                    <input type="number"
+                           id="position"
+                           name="position"
+                           value="{{ is_edit ? subsection.position : 0 }}"
+                           min="0"
+                           class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
+                </div>
+
+                {# Boutons #}
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit"
+                            class="btn btn-primary inline-flex items-center gap-2 rounded-xl bg-[#635bff] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
+                        Enregistrer
+                    </button>
+                    <a href="{{ path('admin_subsection_index') }}"
+                       class="btn btn-outline inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,0,0.06)] px-5 py-2.5 text-sm font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
+                        Annuler
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

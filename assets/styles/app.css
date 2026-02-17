@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #a8b5d1;
+  --color-secondary: #f4d4d4;
+  --color-accent: #d4f4dd;
+  --color-accent-foreground: #4CAF50;
+  --color-destructive: #f8b4b4;
+  --color-destructive-foreground: #742a2a;
+  --color-background: #fafbfc;
+  --color-blue-100: #a78bfa;
+  --color-blue-200: #9c7ef5;
+  --color-blue-brand: #635bff;
+  --color-pink-100: #fda4af;
+  --color-pink-200: #fc8fa0;
+  --color-green-100: #86efac;
+  --color-green-200: #74e496;
+  --color-yellow-100: #ffe4c4;
+  --color-foreground: #2d3748;
+  --color-card: #ffffff;
+  --color-card-foreground: #2d3748;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #2d3748;
+  --color-muted: #f0f4f8;
+  --color-muted-foreground: #718096;
+  --color-border: rgba(0, 0, 0, 0.06);
+  --color-input: #ffffff;
+  --color-ring: #a8b5d1;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-sm transition-all duration-200 cursor-pointer;
+  }
+  .btn-primary {
+    @apply bg-blue-brand text-white hover:opacity-90 shadow-sm;
+  }
+  .btn-secondary {
+    @apply bg-muted text-foreground hover:bg-muted;
+  }
+  .btn-outline {
+    @apply border border-border bg-card text-foreground hover:bg-muted;
+  }
+  .btn-danger {
+    @apply bg-destructive text-destructive-foreground hover:opacity-90;
+  }
+  .card {
+    @apply bg-card rounded-2xl border border-border shadow-sm;
+  }
+  .input {
+    @apply w-full px-4 py-2.5 rounded-xl border border-border bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-opacity-40 transition-shadow;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* Editor.js custom styles */
+.ce-block__content {
+  max-width: 100% !important;
+}
+
+.codex-editor__redactor {
+  padding-bottom: 100px !important;
+}
+
+/* Article content rendering */
+.article-content h2 {
+  @apply text-2xl font-bold mt-8 mb-4 text-foreground;
+  scroll-margin-top: 5rem;
+}
+
+.article-content h3 {
+  @apply text-xl font-semibold mt-6 mb-3 text-foreground;
+  scroll-margin-top: 5rem;
+}
+
+.article-content h4 {
+  @apply text-lg font-semibold mt-4 mb-2 text-foreground;
+  scroll-margin-top: 5rem;
+}
+
+.article-content p {
+  @apply mb-4 leading-relaxed;
+  color: rgba(45, 55, 72, 0.8);
+}
+
+.article-content ul {
+  @apply mb-4 pl-6 list-disc space-y-1;
+}
+
+.article-content ol {
+  @apply mb-4 pl-6 list-decimal space-y-1;
+}
+
+.article-content blockquote {
+  @apply pl-4 py-2 my-4 rounded-r-xl italic;
+  border-left: 4px solid rgba(99, 91, 255, 0.3);
+  background: rgba(240, 244, 248, 0.5);
+}
+
+.article-content table {
+  @apply w-full border-collapse my-4 rounded-xl overflow-hidden;
+}
+
+.article-content table th {
+  @apply bg-muted px-4 py-3 text-left text-sm font-semibold text-foreground border-b border-border;
+}
+
+.article-content table td {
+  @apply px-4 py-3 text-sm border-b border-border;
+}
+
+.article-content table tr:hover {
+  background: rgba(240, 244, 248, 0.3);
+}
+
+.article-content img {
+  @apply rounded-xl my-4 shadow-sm max-w-full;
+}
+
+.article-content .callout {
+  @apply p-4 rounded-xl my-4 flex gap-3;
+}
+
+.article-content .callout-info {
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+}
+
+.article-content .callout-warning {
+  background: rgba(255, 228, 196, 0.3);
+  @apply border border-yellow-100;
+}
+
+.article-content .callout-success {
+  background: rgba(212, 244, 221, 0.3);
+  @apply border border-accent;
+}
+
+.article-content code {
+  @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+}
+
+.article-content pre {
+  @apply bg-foreground text-white p-4 rounded-xl my-4 overflow-x-auto;
+}
+
+.article-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* TOC active state */
+.toc-link.active {
+  @apply text-blue-brand font-medium border-l-2 border-blue-brand;
+}

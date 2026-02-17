@@ -1,0 +1,31 @@
+{# components/footer.html.twig — Pied de page #}
+<footer class="bg-[#f0f4f8] border-t border-[rgba(0,0,0,0.06)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+
+            {# Liens #}
+            <nav class="flex items-center gap-6">
+                <a href="#"
+                   class="text-sm font-medium text-[#2d3748] hover:text-[#635bff] transition-colors">
+                    StudioAstra
+                </a>
+                <span class="text-[#2d3748]/20">|</span>
+                <a href="#"
+                   class="text-sm text-[#2d3748]/60 hover:text-[#635bff] transition-colors">
+                    Nous contacter
+                </a>
+                <span class="text-[#2d3748]/20">|</span>
+                <a href="#"
+                   class="text-sm text-[#2d3748]/60 hover:text-[#635bff] transition-colors">
+                    Conditions d'utilisation
+                </a>
+            </nav>
+
+            {# Copyright #}
+            <p class="text-xs text-[#2d3748]/40">
+                &copy; {{ "now"|date("Y") }} StudioAstra. Tous droits reserves.
+            </p>
+
+        </div>
+    </div>
+</footer>

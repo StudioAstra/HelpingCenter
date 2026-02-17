@@ -1,0 +1,115 @@
+{# admin/article/index.html.twig — Liste des articles
+   Tableau avec titre, sous-section, section, statut, position, date, actions.
+#}
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Articles — {{ parent() }}{% endblock %}
+
+{% block admin_title %}Articles{% endblock %}
+
+{% block admin_content %}
+
+    {# En-tete avec bouton de creation #}
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-[#2d3748]">Articles</h2>
+        <a href="{{ path('admin_article_new') }}"
+           class="btn btn-primary inline-flex items-center gap-2 rounded-xl bg-[#635bff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
+            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            Nouvel article
+        </a>
+    </div>
+
+    {# Tableau des articles #}
+    <div class="bg-[#ffffff] rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-[rgba(0,0,0,0.06)]">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Titre</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Sous-section</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Section</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Statut</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Position</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Date</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-[#2d3748]/50 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[rgba(0,0,0,0.06)]">
+                    {% for article in articles %}
+                        <tr class="hover:bg-[#f0f4f8]/50 transition-colors">
+                            <td class="px-6 py-4 font-medium text-[#2d3748]">
+                                {{ article.title }}
+                            </td>
+                            <td class="px-6 py-4 text-[#2d3748]/60">
+                                {{ article.subsection.title }}
+                            </td>
+                            <td class="px-6 py-4 text-[#2d3748]/60">
+                                {{ article.subsection.section.title }}
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if article.isPublished %}
+                                    <span class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+                                        Publi&eacute;
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center rounded-full bg-[#f0f4f8] px-2.5 py-0.5 text-xs font-medium text-[#2d3748]/50">
+                                        Brouillon
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-[#2d3748]/60">
+                                {{ article.position }}
+                            </td>
+                            <td class="px-6 py-4 text-[#2d3748]/60">
+                                {{ article.updatedAt|date('d/m/Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    {# Modifier #}
+                                    <a href="{{ path('admin_article_edit', { id: article.id }) }}"
+                                       class="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] px-3 py-1.5 text-xs font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
+                                        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+                                        </svg>
+                                        Modifier
+                                    </a>
+
+                                    {# Versions #}
+                                    <a href="{{ path('admin_article_versions', { id: article.id }) }}"
+                                       class="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] px-3 py-1.5 text-xs font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
+                                        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        Versions
+                                    </a>
+
+                                    {# Supprimer #}
+                                    <form method="post" action="{{ path('admin_article_delete', { id: article.id }) }}"
+                                          onsubmit="return confirm('Supprimer cet article ? Cette action est irr&eacute;versible.');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete-article-' ~ article.id) }}">
+                                        <button type="submit"
+                                                class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+                                            <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                            Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center text-sm text-[#2d3748]/40">
+                                Aucun article. Cr&eacute;ez votre premier article.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock %}
