@@ -83,7 +83,12 @@
                                 {% if not loop.first %}
                                     <form method="post"
                                           action="{{ path('admin_article_restore', { id: article.id, versionId: version.id }) }}"
-                                          onsubmit="return confirm('Restaurer la version #{{ version.versionNumber }} ? Le contenu actuel sera remplac&eacute;.');">
+                                          data-controller="confirm-modal"
+                                          data-action="submit->confirm-modal#confirm"
+                                          data-confirm-modal-title-value="Restaurer la version #{{ version.versionNumber }}"
+                                          data-confirm-modal-message-value="Le contenu actuel sera remplacé."
+                                          data-confirm-modal-confirm-label-value="Restaurer"
+                                          data-confirm-modal-variant-value="primary">
                                         <input type="hidden" name="_token" value="{{ csrf_token('restore-version-' ~ version.id) }}">
                                         <button type="submit"
                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(0,0,0,0.06)] px-3 py-1.5 text-xs font-medium text-[#635bff] hover:bg-[#635bff]/5 transition-colors">

@@ -31,18 +31,26 @@ class SearchController extends AbstractController
 
         $data = [];
         foreach ($results as $article) {
+            $section = $article->getSection();
             $subsection = $article->getSubsection();
-            $section = $subsection->getSection();
+            if (!$section) {
+                continue;
+            }
             $data[] = [
                 'id' => $article->getId(),
                 'title' => $article->getTitle(),
                 'section' => $section->getTitle(),
-                'subsection' => $subsection->getTitle(),
-                'url' => $this->generateUrl('front_article', [
-                    'sectionSlug' => $section->getSlug(),
-                    'subsectionSlug' => $subsection->getSlug(),
-                    'articleSlug' => $article->getSlug(),
-                ]),
+                'subsection' => $subsection?->getTitle(),
+                'url' => $subsection
+                    ? $this->generateUrl('front_article', [
+                        'sectionSlug' => $section->getSlug(),
+                        'subsectionSlug' => $subsection->getSlug(),
+                        'articleSlug' => $article->getSlug(),
+                    ])
+                    : $this->generateUrl('front_article_section', [
+                        'sectionSlug' => $section->getSlug(),
+                        'articleSlug' => $article->getSlug(),
+                    ]),
             ];
         }
 

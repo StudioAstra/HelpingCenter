@@ -1,7 +1,7 @@
 {# admin/article/form.html.twig — Formulaire de creation / edition d'article
    Utilise la variable `article` (null = creation, objet = edition).
-   Utilise la variable `subsections` pour le select avec optgroup par section.
-   Integre Editor.js via un Stimulus controller.
+   Utilise les variables `sections` et `subsections` pour le select de localisation.
+   Integre EasyMDE via un Stimulus controller.
 #}
 {% extends 'admin/base.html.twig' %}
 
@@ -12,6 +12,14 @@
 {% block admin_title %}{{ is_edit ? 'Modifier l\'article' : 'Nouvel article' }}{% endblock %}
 
 {% block admin_content %}
+    {% set selected_location = '' %}
+    {% if is_edit %}
+        {% if article.subsection %}
+            {% set selected_location = 'subsection:' ~ article.subsection.id %}
+        {% elseif article.section %}
+            {% set selected_location = 'section:' ~ article.section.id %}
+        {% endif %}
+    {% endif %}
 
     <div class="max-w-4xl">
         <div class="bg-[#ffffff] rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6 lg:p-8">
@@ -24,6 +32,7 @@
                   action="{{ is_edit ? path('admin_article_edit', { id: article.id }) : path('admin_article_new') }}"
                   class="space-y-6"
                   data-controller="editor"
+                  data-editor-content-value="{{ is_edit ? article.content|json_encode|e('html_attr') : '{}' }}"
                   data-action="submit->editor#save">
 
                 {# Titre #}
@@ -41,33 +50,32 @@
                            class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] placeholder-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
                 </div>
 
-                {# Sous-section (avec optgroup par section) #}
+                {# Localisation (section ou sous-section) #}
                 <div>
-                    <label for="subsection_id" class="block text-sm font-medium text-[#2d3748] mb-1.5">
-                        Sous-section
+                    <label for="location_id" class="block text-sm font-medium text-[#2d3748] mb-1.5">
+                        Section / Sous-section
                     </label>
-                    <select id="subsection_id"
-                            name="subsection_id"
+                    <select id="location_id"
+                            name="location_id"
                             required
                             class="input w-full rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-2.5 text-sm text-[#2d3748] focus:outline-none focus:ring-2 focus:ring-[#635bff]/30 focus:border-transparent transition-all">
-                        <option value="">S&eacute;lectionner une sous-section</option>
-                        {% set current_section_id = null %}
-                        {% for subsection in subsections %}
-                            {% if subsection.section.id != current_section_id %}
-                                {% if current_section_id is not null %}
-                                    </optgroup>
-                                {% endif %}
-                                {% set current_section_id = subsection.section.id %}
-                                <optgroup label="{{ subsection.section.title }}">
-                            {% endif %}
-                            <option value="{{ subsection.id }}"
-                                    {{ is_edit and article.subsection.id == subsection.id ? 'selected' : '' }}>
-                                {{ subsection.title }}
-                            </option>
-                        {% endfor %}
-                        {% if current_section_id is not null %}
+                        <option value="">S&eacute;lectionner un emplacement</option>
+                        {% for section in sections %}
+                            <optgroup label="{{ section.title }}">
+                                <option value="section:{{ section.id }}"
+                                        {{ selected_location == ('section:' ~ section.id) ? 'selected' : '' }}>
+                                    {{ section.title }} (section)
+                                </option>
+                                {% for subsection in subsections %}
+                                    {% if subsection.section.id == section.id %}
+                                        <option value="subsection:{{ subsection.id }}"
+                                                {{ selected_location == ('subsection:' ~ subsection.id) ? 'selected' : '' }}>
+                                            ↳ {{ subsection.title }}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
                             </optgroup>
-                        {% endif %}
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -99,7 +107,7 @@
                     </div>
                 </div>
 
-                {# Editeur de contenu (Editor.js) #}
+                {# Editeur de contenu (EasyMDE) #}
                 <div>
                     <label class="block text-sm font-medium text-[#2d3748] mb-1.5">
                         Contenu
@@ -107,10 +115,8 @@
                     <input type="hidden"
                            name="content"
                            data-editor-target="input"
-                           value="{{ is_edit ? article.content|json_encode : '{}' }}">
+                           value="{{ is_edit ? article.content|json_encode|e('html_attr') : '{}' }}">
                     <div data-editor-target="holder"
-                         data-editor-content-value="{{ is_edit ? article.content|json_encode|e('html_attr') : '{}' }}"
-                         data-editor-upload-url-value="{{ path('admin_upload_image') }}"
                          class="min-h-[400px] rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] px-4 py-4 text-sm text-[#2d3748] focus-within:ring-2 focus-within:ring-[#635bff]/30 focus-within:border-transparent transition-all">
                     </div>
                 </div>

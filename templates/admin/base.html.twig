@@ -50,6 +50,16 @@
                 Sections
             </a>
 
+                       {# Sections #}
+            <a href="{{ path('admin_subsection_index') }}"
+               class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors
+                      {{ current_route starts with 'admin_subsection' ? 'bg-[#635bff]/10 text-[#635bff]' : 'text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748]' }}">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                </svg>
+                Sous-sections
+            </a>
+
             {# Articles #}
             <a href="{{ path('admin_article_index') }}"
                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors
@@ -59,11 +69,21 @@
                 </svg>
                 Articles
             </a>
+
+            {# Feedbacks #}
+            <a href="{{ path('admin_feedback_index') }}"
+               class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors
+                      {{ current_route starts with 'admin_feedback' ? 'bg-[#635bff]/10 text-[#635bff]' : 'text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748]' }}">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-7.5 8.25h15A2.25 2.25 0 0 0 21.75 17.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15A2.25 2.25 0 0 0 2.25 6.75v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                </svg>
+                Feedbacks
+            </a>
         </nav>
 
         {# Bas de sidebar : lien vers le site public #}
         <div class="px-3 py-4 border-t border-[rgba(0,0,0,0.06)]">
-            <a href="{{ path('app_home') }}"
+            <a href="{{ path('front_home') }}"
                class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
                 <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
@@ -99,7 +119,7 @@
                 <span class="text-sm text-[#2d3748]/60">
                     {{ app.user.email|default('Admin') }}
                 </span>
-                <a href="{{ path('app_logout') }}"
+                <a href="{{ path('admin_logout') }}"
                    class="inline-flex items-center gap-1.5 rounded-xl border border-[rgba(0,0,0,0.06)] px-3 py-1.5 text-sm font-medium text-[#2d3748]/60 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
                     <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />

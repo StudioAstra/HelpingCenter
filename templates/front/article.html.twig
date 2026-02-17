@@ -5,12 +5,17 @@
 
 {% block body %}
 {# ── Breadcrumbs ── #}
-{% include 'components/breadcrumbs.html.twig' with {breadcrumbs: [
+{% set breadcrumbs = [
     {label: 'Accueil', url: path('front_home')},
-    {label: section.title, url: path('front_section', {sectionSlug: section.slug})},
-    {label: subsection.title, url: path('front_subsection', {sectionSlug: section.slug, subsectionSlug: subsection.slug})},
-    {label: article.title, url: null}
-]} %}
+    {label: section.title, url: path('front_section', {sectionSlug: section.slug})}
+] %}
+{% if subsection %}
+    {% set breadcrumbs = breadcrumbs|merge([
+        {label: subsection.title, url: path('front_subsection', {sectionSlug: section.slug, subsectionSlug: subsection.slug})}
+    ]) %}
+{% endif %}
+{% set breadcrumbs = breadcrumbs|merge([{label: article.title, url: null}]) %}
+{% include 'components/breadcrumbs.html.twig' with {breadcrumbs: breadcrumbs} %}
 
 {# ── Two-Column Layout ── #}
 <section class="mx-auto max-w-7xl px-4 py-8">
@@ -25,7 +30,7 @@
 
             {# Meta #}
             <p class="mt-3 text-sm text-[#2d3748]/40">
-                Mis à jour le {{ article.updatedAt|date('d/m/Y') }}
+                Mis à jour le {{ article.updatedAt|date('d/m/Y') }} · {{ readingTimeMinutes }} min de lecture
             </p>
 
             {# Article Body #}
@@ -38,7 +43,7 @@
                         prose-pre:rounded-2xl prose-pre:bg-[#2d3748] prose-pre:text-sm
                         prose-img:rounded-2xl
                         prose-blockquote:border-[#635bff]/30 prose-blockquote:text-[#2d3748]/70
-                        prose-li:text-[#2d3748]/80">
+                        prose-li:text-[#2d3748]/80 [&_img]:rounded-xl">
                 {{ htmlContent|raw }}
             </div>
 
@@ -47,28 +52,38 @@
                 {% include 'components/feedback.html.twig' %}
             </div>
 
+            {# ── Related Articles ── #}
+            {% if relatedArticles is defined and relatedArticles|length > 0 %}
+                <section class="mt-10">
+                    <h2 class="font-satoshi text-xl font-bold text-[#2d3748]">Vous pourriez avoir besoin</h2>
+                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        {% for related in relatedArticles %}
+                            <a href="{{ related.subsection
+                                ? path('front_article', {sectionSlug: related.section.slug, subsectionSlug: related.subsection.slug, articleSlug: related.slug})
+                                : path('front_article_section', {sectionSlug: related.section.slug, articleSlug: related.slug}) }}"
+                               class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
+                                <h3 class="font-satoshi text-sm font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                                    {{ related.title }}
+                                </h3>
+                                {% if related.searchText %}
+                                    <p class="mt-1 text-xs text-[#2d3748]/60">
+                                        {{ related.searchText|length > 90 ? related.searchText|slice(0, 90) ~ '...' : related.searchText }}
+                                    </p>
+                                {% endif %}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
             {# ── Previous / Next Navigation ── #}
-            {% if siblings is defined and siblings|length > 0 %}
-                {% set previousArticle = null %}
-                {% set nextArticle = null %}
-                {% set found = false %}
-
-                {% for sibling in siblings %}
-                    {% if found and nextArticle is null %}
-                        {% set nextArticle = sibling %}
-                    {% endif %}
-                    {% if sibling.id == article.id %}
-                        {% set found = true %}
-                    {% endif %}
-                    {% if not found %}
-                        {% set previousArticle = sibling %}
-                    {% endif %}
-                {% endfor %}
-
+            {% if previousArticle is defined or nextArticle is defined %}
                 <nav class="mt-10 flex items-center justify-between border-t border-[rgba(0,0,0,0.06)] pt-6">
                     {# Previous #}
                     {% if previousArticle %}
-                        <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: previousArticle.slug}) }}"
+                        <a href="{{ subsection
+                            ? path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: previousArticle.slug})
+                            : path('front_article_section', {sectionSlug: section.slug, articleSlug: previousArticle.slug}) }}"
                            class="group flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#2d3748]/70 transition hover:bg-[#f0f4f8] hover:text-[#635bff]">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
@@ -81,7 +96,9 @@
 
                     {# Next #}
                     {% if nextArticle %}
-                        <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: nextArticle.slug}) }}"
+                        <a href="{{ subsection
+                            ? path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: nextArticle.slug})
+                            : path('front_article_section', {sectionSlug: section.slug, articleSlug: nextArticle.slug}) }}"
                            class="group flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#2d3748]/70 transition hover:bg-[#f0f4f8] hover:text-[#635bff]">
                             <span>{{ nextArticle.title }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

@@ -39,7 +39,7 @@ export default class extends Controller {
             this.resultsTarget.innerHTML = results.map(r => `
                 <a href="${r.url}" class="block px-4 py-3 hover:bg-muted transition-colors border-b border-border last:border-0">
                     <div class="font-medium text-foreground text-sm">${r.title}</div>
-                    <div class="text-xs text-muted-foreground mt-0.5">${r.section} &rsaquo; ${r.subsection}</div>
+                    <div class="text-xs text-muted-foreground mt-0.5">${r.section}${r.subsection ? ` &rsaquo; ${r.subsection}` : ''}</div>
                 </a>
             `).join('');
         }

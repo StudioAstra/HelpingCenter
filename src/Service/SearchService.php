@@ -25,8 +25,8 @@ class SearchService
 
         return $qb->select('a')
             ->from(Article::class, 'a')
-            ->join('a.subsection', 's')
-            ->join('s.section', 'sec')
+            ->join('a.section', 'sec')
+            ->leftJoin('a.subsection', 's')
             ->where('a.isPublished = :published')
             ->andWhere(
                 $qb->expr()->orX(

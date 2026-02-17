@@ -68,7 +68,11 @@
 
                                     {# Supprimer #}
                                     <form method="post" action="{{ path('admin_section_delete', { id: section.id }) }}"
-                                          onsubmit="return confirm('Supprimer cette section ? Cette action est irr&eacute;versible.');">
+                                          data-controller="confirm-modal"
+                                          data-action="submit->confirm-modal#confirm"
+                                          data-confirm-modal-title-value="Supprimer la section"
+                                          data-confirm-modal-message-value="Supprimer cette section ? Cette action est irréversible."
+                                          data-confirm-modal-confirm-label-value="Supprimer">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete-section-' ~ section.id) }}">
                                         <button type="submit"
                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">

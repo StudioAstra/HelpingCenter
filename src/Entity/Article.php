@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'article')]
-#[ORM\UniqueConstraint(name: 'UNIQ_ARTICLE_SUBSECTION_SLUG', columns: ['subsection_id', 'slug'])]
+#[ORM\UniqueConstraint(name: 'UNIQ_ARTICLE_LOCATION_SLUG', columns: ['section_id', 'subsection_id', 'slug'])]
 #[ORM\Index(columns: ['search_text'], flags: ['fulltext'])]
 #[ORM\HasLifecycleCallbacks]
 class Article
@@ -19,8 +19,12 @@ class Article
     #[ORM\Column(type: Types::INTEGER)]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Subsection::class, inversedBy: 'articles')]
+    #[ORM\ManyToOne(targetEntity: Section::class)]
     #[ORM\JoinColumn(nullable: false)]
+    private ?Section $section = null;
+
+    #[ORM\ManyToOne(targetEntity: Subsection::class, inversedBy: 'articles')]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Subsection $subsection = null;
 
     #[ORM\Column(type: Types::STRING, length: 255)]
@@ -71,6 +75,18 @@ class Article
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getSection(): ?Section
+    {
+        return $this->section;
+    }
+
+    public function setSection(?Section $section): static
+    {
+        $this->section = $section;
+
+        return $this;
     }
 
     public function getSubsection(): ?Subsection

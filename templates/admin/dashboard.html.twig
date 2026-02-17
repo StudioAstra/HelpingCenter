@@ -100,7 +100,7 @@
                                 </a>
                             </td>
                             <td class="px-6 py-4 text-[#2d3748]/60">
-                                {{ article.subsection.title }}
+                                {{ article.subsection ? article.subsection.title : '—' }}
                             </td>
                             <td class="px-6 py-4">
                                 {% if article.isPublished %}

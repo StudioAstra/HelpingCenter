@@ -5,16 +5,24 @@ namespace App\Service;
 class ArticleRenderer
 {
     /**
-     * Renders Editor.js JSON blocks into HTML.
+     * Renders article content into HTML.
      */
-    public function renderBlocks(?array $blocks): string
+    public function renderBlocks(?array $content): string
     {
-        if (!$blocks || !isset($blocks['blocks'])) {
+        if (!$content) {
+            return '';
+        }
+
+        if (isset($content['markdown']) && is_string($content['markdown'])) {
+            return $this->renderMarkdown($content['markdown']);
+        }
+
+        if (!isset($content['blocks']) || !is_array($content['blocks'])) {
             return '';
         }
 
         $html = '';
-        foreach ($blocks['blocks'] as $block) {
+        foreach ($content['blocks'] as $block) {
             $html .= $this->renderBlock($block);
         }
 
@@ -22,17 +30,25 @@ class ArticleRenderer
     }
 
     /**
-     * Extracts plain text from Editor.js blocks for search indexing.
+     * Extracts plain text from article content for search indexing.
      */
-    public function extractText(?array $blocks): string
+    public function extractText(?array $content): string
     {
-        if (!$blocks || !isset($blocks['blocks'])) {
+        if (!$content) {
+            return '';
+        }
+
+        if (isset($content['markdown']) && is_string($content['markdown'])) {
+            return $this->extractTextFromMarkdown($content['markdown']);
+        }
+
+        if (!isset($content['blocks']) || !is_array($content['blocks'])) {
             return '';
         }
 
         $texts = [];
-        foreach ($blocks['blocks'] as $block) {
-            $text = $this->extractBlockText($block);
+        foreach ($content['blocks'] as $block) {
+            $text = $this->extractTextFromBlock($block);
             if ($text) {
                 $texts[] = $text;
             }
@@ -42,18 +58,26 @@ class ArticleRenderer
     }
 
     /**
-     * Extracts headings from Editor.js blocks for TOC generation.
+     * Extracts headings from article content for TOC generation.
      *
      * @return array<array{id: string, text: string, level: int}>
      */
-    public function extractHeadings(?array $blocks): array
+    public function extractHeadings(?array $content): array
     {
-        if (!$blocks || !isset($blocks['blocks'])) {
+        if (!$content) {
+            return [];
+        }
+
+        if (isset($content['markdown']) && is_string($content['markdown'])) {
+            return $this->extractHeadingsFromMarkdown($content['markdown']);
+        }
+
+        if (!isset($content['blocks']) || !is_array($content['blocks'])) {
             return [];
         }
 
         $headings = [];
-        foreach ($blocks['blocks'] as $block) {
+        foreach ($content['blocks'] as $block) {
             if ($block['type'] === 'header') {
                 $text = strip_tags($block['data']['text'] ?? '');
                 $id = $this->slugify($text);
@@ -66,6 +90,272 @@ class ArticleRenderer
         }
 
         return $headings;
+    }
+
+    private function renderMarkdown(string $markdown): string
+    {
+        $lines = preg_split("/\r\n|\n|\r/", trim($markdown));
+        if (!$lines) {
+            return '';
+        }
+
+        $html = '';
+        $paragraph = [];
+        $lineCount = count($lines);
+        $i = 0;
+
+        while ($i < $lineCount) {
+            $line = rtrim($lines[$i]);
+            $trimmed = trim($line);
+
+            if ($trimmed === '') {
+                $html .= $this->flushParagraph($paragraph);
+                $i++;
+                continue;
+            }
+
+            if (preg_match('/^(#{1,6})\s+(.+)$/', $trimmed, $matches)) {
+                $html .= $this->flushParagraph($paragraph);
+                $level = strlen($matches[1]);
+                $text = $this->renderInline(trim($matches[2]));
+                $id = $this->slugify(strip_tags(trim($matches[2])));
+                $html .= "<h{$level} id=\"{$id}\">{$text}</h{$level}>";
+                $i++;
+                continue;
+            }
+
+            if (preg_match('/^(-{3,}|_{3,}|\*{3,})$/', $trimmed)) {
+                $html .= $this->flushParagraph($paragraph);
+                $html .= '<hr class="my-8 border-border">';
+                $i++;
+                continue;
+            }
+
+            if (preg_match('/^```/', $trimmed)) {
+                $html .= $this->flushParagraph($paragraph);
+                $i++;
+                $codeLines = [];
+
+                while ($i < $lineCount && !preg_match('/^```/', trim($lines[$i]))) {
+                    $codeLines[] = $lines[$i];
+                    $i++;
+                }
+
+                if ($i < $lineCount) {
+                    $i++;
+                }
+
+                $code = htmlspecialchars(implode("\n", $codeLines), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+                $html .= "<pre><code>{$code}</code></pre>";
+                continue;
+            }
+
+            if (preg_match('/^>\s?(.*)$/', $trimmed, $matches)) {
+                $html .= $this->flushParagraph($paragraph);
+                $quoteLines = [trim($matches[1])];
+                $i++;
+
+                while ($i < $lineCount && preg_match('/^>\s?(.*)$/', trim($lines[$i]), $nextMatches)) {
+                    $quoteLines[] = trim($nextMatches[1]);
+                    $i++;
+                }
+
+                $quoteText = implode("\n", $quoteLines);
+                $html .= "<blockquote><p>{$this->renderInline($quoteText)}</p></blockquote>";
+                continue;
+            }
+
+            if (preg_match('/^\s*[-*+]\s+(.+)$/', $trimmed, $matches)) {
+                $html .= $this->flushParagraph($paragraph);
+                $items = [trim($matches[1])];
+                $i++;
+
+                while ($i < $lineCount && preg_match('/^\s*[-*+]\s+(.+)$/', trim($lines[$i]), $nextMatches)) {
+                    $items[] = trim($nextMatches[1]);
+                    $i++;
+                }
+
+                $html .= '<ul>';
+                foreach ($items as $item) {
+                    $html .= '<li>' . $this->renderInline($item) . '</li>';
+                }
+                $html .= '</ul>';
+                continue;
+            }
+
+            if (preg_match('/^\s*\d+\.\s+(.+)$/', $trimmed, $matches)) {
+                $html .= $this->flushParagraph($paragraph);
+                $items = [trim($matches[1])];
+                $i++;
+
+                while ($i < $lineCount && preg_match('/^\s*\d+\.\s+(.+)$/', trim($lines[$i]), $nextMatches)) {
+                    $items[] = trim($nextMatches[1]);
+                    $i++;
+                }
+
+                $html .= '<ol>';
+                foreach ($items as $item) {
+                    $html .= '<li>' . $this->renderInline($item) . '</li>';
+                }
+                $html .= '</ol>';
+                continue;
+            }
+
+            if (str_starts_with($trimmed, '|') && str_ends_with($trimmed, '|')) {
+                $html .= $this->flushParagraph($paragraph);
+                $tableLines = [$trimmed];
+                $i++;
+
+                while ($i < $lineCount) {
+                    $next = trim($lines[$i]);
+                    if (!str_starts_with($next, '|') || !str_ends_with($next, '|')) {
+                        break;
+                    }
+                    $tableLines[] = $next;
+                    $i++;
+                }
+
+                $html .= $this->renderMarkdownTable($tableLines);
+                continue;
+            }
+
+            $paragraph[] = $trimmed;
+            $i++;
+        }
+
+        $html .= $this->flushParagraph($paragraph);
+
+        return $html;
+    }
+
+    private function extractTextFromMarkdown(string $markdown): string
+    {
+        $text = preg_replace('/```[\s\S]*?```/', ' ', $markdown);
+        $text = preg_replace('/!\[[^\]]*]\([^)]+\)/', ' ', $text);
+        $text = preg_replace('/\[([^\]]+)\]\([^)]+\)/', '$1', $text);
+        $text = preg_replace('/[#>*`\-\|\[\]_]/', ' ', $text);
+        $text = preg_replace('/\s+/', ' ', trim($text ?? ''));
+
+        return strip_tags($text ?? '');
+    }
+
+    /**
+     * @return array<array{id: string, text: string, level: int}>
+     */
+    private function extractHeadingsFromMarkdown(string $markdown): array
+    {
+        $headings = [];
+        $lines = preg_split("/\r\n|\n|\r/", $markdown) ?: [];
+
+        foreach ($lines as $line) {
+            $trimmed = trim($line);
+            if (!preg_match('/^(#{1,6})\s+(.+)$/', $trimmed, $matches)) {
+                continue;
+            }
+
+            $level = strlen($matches[1]);
+            $text = trim(strip_tags($matches[2]));
+            if ($text === '') {
+                continue;
+            }
+
+            $headings[] = [
+                'id' => $this->slugify($text),
+                'text' => $text,
+                'level' => $level,
+            ];
+        }
+
+        return $headings;
+    }
+
+    private function flushParagraph(array &$paragraphLines): string
+    {
+        if ($paragraphLines === []) {
+            return '';
+        }
+
+        $text = implode(' ', $paragraphLines);
+        $paragraphLines = [];
+
+        return '<p>' . $this->renderInline($text) . '</p>';
+    }
+
+    private function renderInline(string $text): string
+    {
+        $escaped = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $escaped = preg_replace('/!\[([^\]]*)]\(([^)]+)\)/', '<img src="$2" alt="$1" loading="lazy">', $escaped);
+        $escaped = preg_replace('/\[([^\]]+)]\(([^)]+)\)/', '<a href="$2">$1</a>', $escaped);
+        $escaped = preg_replace('/\*\*([^*]+)\*\*/', '<strong>$1</strong>', $escaped);
+        $escaped = preg_replace('/\*([^*]+)\*/', '<em>$1</em>', $escaped);
+        $escaped = preg_replace('/`([^`]+)`/', '<code>$1</code>', $escaped);
+
+        return $escaped ?? '';
+    }
+
+    private function renderMarkdownTable(array $lines): string
+    {
+        if (count($lines) < 2) {
+            return '<p>' . $this->renderInline(implode(' ', $lines)) . '</p>';
+        }
+
+        $rows = array_map(function (string $line): array {
+            $cells = array_map('trim', explode('|', trim($line, '|')));
+            return array_values(array_filter($cells, static fn ($cell) => $cell !== ''));
+        }, $lines);
+
+        if (count($rows) < 2) {
+            return '';
+        }
+
+        $header = $rows[0];
+        $body = array_slice($rows, 2);
+
+        $html = '<div class="overflow-x-auto my-4"><table><thead><tr>';
+        foreach ($header as $cell) {
+            $html .= '<th>' . $this->renderInline($cell) . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        foreach ($body as $row) {
+            $html .= '<tr>';
+            foreach ($row as $cell) {
+                $html .= '<td>' . $this->renderInline($cell) . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table></div>';
+
+        return $html;
+    }
+
+    private function extractTextFromBlock(array $block): string
+    {
+        $data = $block['data'] ?? [];
+
+        return match ($block['type'] ?? '') {
+            'header' => strip_tags($data['text'] ?? ''),
+            'paragraph' => strip_tags($data['text'] ?? ''),
+            'list' => implode(' ', array_map(
+                static fn ($item) => strip_tags(is_array($item) ? ($item['content'] ?? '') : (string) $item),
+                $data['items'] ?? []
+            )),
+            'image' => strip_tags($data['caption'] ?? ''),
+            'table' => implode(' ', array_map(
+                static fn ($row) => is_array($row) ? implode(' ', array_map('strip_tags', $row)) : '',
+                $data['content'] ?? []
+            )),
+            'code' => $data['code'] ?? '',
+            'quote' => trim(strip_tags(($data['text'] ?? '') . ' ' . ($data['caption'] ?? ''))),
+            'warning', 'alert' => trim(strip_tags(($data['title'] ?? '') . ' ' . ($data['message'] ?? '') . ' ' . ($data['text'] ?? ''))),
+            'raw' => strip_tags($data['html'] ?? ''),
+            'checklist' => implode(' ', array_map(
+                static fn ($item) => strip_tags($item['text'] ?? ''),
+                $data['items'] ?? []
+            )),
+            default => '',
+        };
     }
 
     private function renderBlock(array $block): string

@@ -33,10 +33,33 @@
 
 {# ── Subsection Cards Grid ── #}
 <section class="mx-auto max-w-7xl px-4 py-8">
+    {% if sectionArticles is defined and sectionArticles|length > 0 %}
+        <div class="mb-8 rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm">
+            <h2 class="font-satoshi text-xl font-bold text-[#2d3748]">Articles de cette section</h2>
+            <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {% for article in sectionArticles %}
+                    <a href="{{ path('front_article_section', {sectionSlug: section.slug, articleSlug: article.slug}) }}"
+                       class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
+                        <div class="text-xs font-medium text-[#2d3748]/40">Section</div>
+                        <h3 class="mt-1 font-satoshi text-base font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                            {{ article.title }}
+                        </h3>
+                        {% if article.searchText %}
+                            <p class="mt-2 text-sm text-[#2d3748]/60">
+                                {{ article.searchText|length > 120 ? article.searchText|slice(0, 120) ~ '...' : article.searchText }}
+                            </p>
+                        {% endif %}
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
     {% if section.subsections|length > 0 %}
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {% for sub in section.subsections %}
                 <div class="rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                    {% set publishedSubArticles = sub.articles|filter(a => a.isPublished) %}
                     <a href="{{ path('front_subsection', {sectionSlug: section.slug, subsectionSlug: sub.slug}) }}"
                        class="block">
                         <h2 class="font-satoshi text-lg font-bold text-[#2d3748] hover:text-[#635bff]">
@@ -47,24 +70,26 @@
                         <p class="mt-1 text-sm text-[#2d3748]/60">{{ sub.description }}</p>
                     {% endif %}
                     <p class="mt-3 text-xs font-medium text-[#2d3748]/40">
-                        {{ sub.articles|length }} article{{ sub.articles|length > 1 ? 's' : '' }}
+                        {{ publishedSubArticles|length }} article{{ publishedSubArticles|length > 1 ? 's' : '' }}
                     </p>
 
-                    {# Article Links #}
-                    {% if sub.articles|length > 0 %}
-                        <ul class="mt-4 space-y-2 border-t border-[rgba(0,0,0,0.06)] pt-3">
-                            {% for article in sub.articles %}
-                                <li>
-                                    <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: sub.slug, articleSlug: article.slug}) }}"
-                                       class="flex items-center gap-2 text-sm text-[#2d3748]/70 hover:text-[#635bff]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 shrink-0 text-[#2d3748]/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
-                                        </svg>
+                    {# Article Cards #}
+                    {% if publishedSubArticles|length > 0 %}
+                        <div class="mt-4 grid grid-cols-1 gap-3 border-t border-[rgba(0,0,0,0.06)] pt-3">
+                            {% for article in publishedSubArticles %}
+                                <a href="{{ path('front_article', {sectionSlug: section.slug, subsectionSlug: sub.slug, articleSlug: article.slug}) }}"
+                                   class="group block rounded-xl border border-[rgba(0,0,0,0.06)] bg-[#fafbfc] p-4 transition hover:-translate-y-0.5 hover:border-[#635bff]/20 hover:shadow-sm">
+                                    <h3 class="font-satoshi text-sm font-bold text-[#2d3748] group-hover:text-[#635bff]">
                                         {{ article.title }}
-                                    </a>
-                                </li>
+                                    </h3>
+                                    {% if article.searchText %}
+                                        <p class="mt-1 text-xs text-[#2d3748]/60">
+                                            {{ article.searchText|length > 90 ? article.searchText|slice(0, 90) ~ '...' : article.searchText }}
+                                        </p>
+                                    {% endif %}
+                                </a>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% endif %}
                 </div>
             {% endfor %}

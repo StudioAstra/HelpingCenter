@@ -99,8 +99,11 @@ class ApiController extends AbstractController
             return new JsonResponse(['error' => 'Article non trouvé.'], 404);
         }
 
+        $section = $article->getSection();
         $subsection = $article->getSubsection();
-        $section = $subsection->getSection();
+        if (!$section) {
+            return new JsonResponse(['error' => 'Section introuvable.'], 404);
+        }
 
         return new JsonResponse([
             'id' => $article->getId(),
@@ -113,10 +116,10 @@ class ApiController extends AbstractController
                 'title' => $section->getTitle(),
                 'slug' => $section->getSlug(),
             ],
-            'subsection' => [
+            'subsection' => $subsection ? [
                 'title' => $subsection->getTitle(),
                 'slug' => $subsection->getSlug(),
-            ],
+            ] : null,
             'published_at' => $article->getPublishedAt()?->format('c'),
             'updated_at' => $article->getUpdatedAt()->format('c'),
         ]);
@@ -130,16 +133,19 @@ class ApiController extends AbstractController
 
         $data = [];
         foreach ($results as $article) {
+            $section = $article->getSection();
             $subsection = $article->getSubsection();
-            $section = $subsection->getSection();
+            if (!$section) {
+                continue;
+            }
             $data[] = [
                 'id' => $article->getId(),
                 'title' => $article->getTitle(),
                 'section' => $section->getTitle(),
-                'subsection' => $subsection->getTitle(),
+                'subsection' => $subsection?->getTitle(),
                 'slug' => $article->getSlug(),
                 'section_slug' => $section->getSlug(),
-                'subsection_slug' => $subsection->getSlug(),
+                'subsection_slug' => $subsection?->getSlug(),
             ];
         }
 

@@ -4,104 +4,254 @@ export default class extends Controller {
     static targets = ['holder', 'input'];
     static values = {
         content: { type: String, default: '{}' },
-        uploadUrl: String,
     };
 
     async connect() {
-        const EditorJS = (await import('@editorjs/editorjs')).default;
-        const Header = (await import('@editorjs/header')).default;
-        const List = (await import('@editorjs/list')).default;
-        const ImageTool = (await import('@editorjs/image')).default;
-        const Table = (await import('@editorjs/table')).default;
-        const Quote = (await import('@editorjs/quote')).default;
-        const CodeTool = (await import('@editorjs/code')).default;
-        const Delimiter = (await import('@editorjs/delimiter')).default;
-        const Warning = (await import('@editorjs/warning')).default;
-        const Checklist = (await import('@editorjs/checklist')).default;
-        const RawTool = (await import('@editorjs/raw')).default;
+        const EasyMDE = (await import('easymde')).default;
 
-        let initialData = {};
-        try {
-            initialData = JSON.parse(this.contentValue);
-        } catch (e) {
-            initialData = {};
-        }
+        const initialRawContent =
+            this.contentValue && this.contentValue !== '{}'
+                ? this.contentValue
+                : this.inputTarget.value;
+        const content = this.parseContent(initialRawContent);
+        const initialMarkdown = this.contentToMarkdown(content);
 
-        this.editor = new EditorJS({
-            holder: this.holderTarget,
+        const textarea = document.createElement('textarea');
+        this.holderTarget.innerHTML = '';
+        this.holderTarget.appendChild(textarea);
+
+        this.editor = new EasyMDE({
+            element: textarea,
+            initialValue: initialMarkdown,
             placeholder: 'Commencez à écrire votre article...',
-            data: initialData,
-            tools: {
-                header: {
-                    class: Header,
-                    config: {
-                        placeholder: 'Titre',
-                        levels: [2, 3, 4],
-                        defaultLevel: 2,
-                    },
+            spellChecker: false,
+            status: false,
+            forceSync: true,
+            toolbar: [
+                'bold',
+                'italic',
+                'heading',
+                '|',
+                'quote',
+                'unordered-list',
+                'ordered-list',
+                '|',
+                'link',
+                {
+                    name: 'image',
+                    title: 'Televerser une image',
+                    className: 'fa fa-image',
+                    action: () => this.openImagePicker(),
                 },
-                list: {
-                    class: List,
-                    inlineToolbar: true,
-                    config: {
-                        defaultStyle: 'unordered',
-                    },
-                },
-                image: {
-                    class: ImageTool,
-                    config: {
-                        endpoints: {
-                            byFile: this.uploadUrlValue,
-                        },
-                        field: 'image',
-                    },
-                },
-                table: {
-                    class: Table,
-                    inlineToolbar: true,
-                    config: {
-                        rows: 2,
-                        cols: 3,
-                        withHeadings: true,
-                    },
-                },
-                quote: {
-                    class: Quote,
-                    config: {
-                        quotePlaceholder: 'Citation...',
-                        captionPlaceholder: 'Auteur',
-                    },
-                },
-                code: CodeTool,
-                delimiter: Delimiter,
-                warning: {
-                    class: Warning,
-                    config: {
-                        titlePlaceholder: 'Titre',
-                        messagePlaceholder: 'Message',
-                    },
-                },
-                checklist: {
-                    class: Checklist,
-                    inlineToolbar: true,
-                },
-                raw: {
-                    class: RawTool,
-                    config: {
-                        placeholder: 'HTML brut...',
-                    },
-                },
-            },
+                '|',
+                'preview',
+                'side-by-side',
+                'fullscreen',
+                '|',
+                'guide',
+            ],
+        });
+
+        this.inputTarget.value = JSON.stringify({ markdown: initialMarkdown });
+        this.editor.codemirror.on('change', () => {
+            this.inputTarget.value = JSON.stringify({ markdown: this.editor.value() });
         });
     }
 
-    async save() {
+    save() {
         if (!this.editor) return;
-        const data = await this.editor.save();
-        this.inputTarget.value = JSON.stringify(data);
+        this.inputTarget.value = JSON.stringify({ markdown: this.editor.value() });
     }
 
     disconnect() {
-        this.editor?.destroy();
+        if (this.editor) {
+            this.editor.toTextArea();
+            this.editor = null;
+        }
+    }
+
+    parseContent(value) {
+        try {
+            return JSON.parse(value);
+        } catch (e) {
+            return {};
+        }
+    }
+
+    contentToMarkdown(content) {
+        if (typeof content?.markdown === 'string') {
+            return content.markdown;
+        }
+
+        if (!Array.isArray(content?.blocks)) {
+            return '';
+        }
+
+        const lines = content.blocks
+            .map((block) => this.blockToMarkdown(block))
+            .filter((line) => line.length > 0);
+
+        return lines.join('\n\n').trim();
+    }
+
+    blockToMarkdown(block) {
+        const data = block?.data ?? {};
+
+        switch (block?.type) {
+            case 'header': {
+                const level = Math.min(Math.max(Number(data.level) || 2, 1), 6);
+                const text = this.stripHtml(data.text ?? '');
+                return `${'#'.repeat(level)} ${text}`.trim();
+            }
+            case 'paragraph':
+                return this.stripHtml(data.text ?? '');
+            case 'list': {
+                const items = Array.isArray(data.items) ? data.items : [];
+                const ordered = data.style === 'ordered';
+
+                return items
+                    .map((item, index) => {
+                        const raw = typeof item === 'object' ? (item.content ?? '') : item;
+                        const text = this.stripHtml(String(raw));
+                        return ordered ? `${index + 1}. ${text}` : `- ${text}`;
+                    })
+                    .join('\n');
+            }
+            case 'checklist': {
+                const items = Array.isArray(data.items) ? data.items : [];
+                return items
+                    .map((item) => {
+                        const checked = item?.checked ? 'x' : ' ';
+                        const text = this.stripHtml(item?.text ?? '');
+                        return `- [${checked}] ${text}`;
+                    })
+                    .join('\n');
+            }
+            case 'quote': {
+                const text = this.stripHtml(data.text ?? '');
+                const caption = this.stripHtml(data.caption ?? '');
+                return caption ? `> ${text}\n>\n> ${caption}` : `> ${text}`;
+            }
+            case 'code':
+                return `\`\`\`\n${data.code ?? ''}\n\`\`\``;
+            case 'delimiter':
+                return '---';
+            case 'image': {
+                const url = data?.file?.url ?? data?.url ?? '';
+                if (!url) return '';
+                const caption = this.stripHtml(data.caption ?? '');
+                return `![${caption}](${url})`;
+            }
+            case 'table': {
+                const rows = Array.isArray(data.content) ? data.content : [];
+                if (rows.length === 0) return '';
+
+                const normalizedRows = rows.map((row) =>
+                    Array.isArray(row) ? row.map((cell) => this.stripHtml(String(cell ?? ''))) : []
+                );
+                const maxCols = Math.max(...normalizedRows.map((row) => row.length), 1);
+                const paddedRows = normalizedRows.map((row) => {
+                    const next = [...row];
+                    while (next.length < maxCols) next.push('');
+                    return next;
+                });
+
+                const headerRow = paddedRows[0];
+                const separatorRow = Array(maxCols).fill('---');
+                const bodyRows = paddedRows.slice(1);
+                const tableRows = [headerRow, separatorRow, ...bodyRows];
+
+                return tableRows.map((row) => `| ${row.join(' | ')} |`).join('\n');
+            }
+            case 'warning':
+            case 'alert': {
+                const title = this.stripHtml(data.title ?? '');
+                const message = this.stripHtml(data.message ?? data.text ?? '');
+                if (title && message) return `> **${title}**\n>\n> ${message}`;
+                if (title) return `> **${title}**`;
+                if (message) return `> ${message}`;
+                return '';
+            }
+            case 'raw':
+                return data.html ?? '';
+            default:
+                return '';
+        }
+    }
+
+    stripHtml(value) {
+        const container = document.createElement('div');
+        container.innerHTML = value;
+        return (container.textContent || container.innerText || '').trim();
+    }
+
+    openImagePicker() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+
+        input.addEventListener('change', async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                window.alert('Le fichier choisi doit etre une image.');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                window.alert('Image trop volumineuse (max 5 Mo).');
+                return;
+            }
+
+            const { url, message } = await this.uploadImage(file);
+            if (!url) {
+                window.alert(message || "Impossible d'envoyer l'image.");
+                return;
+            }
+
+            const markdown = `![${file.name}](${url})`;
+            this.editor.codemirror.replaceSelection(markdown);
+            this.editor.codemirror.focus();
+            this.inputTarget.value = JSON.stringify({ markdown: this.editor.value() });
+        });
+
+        input.click();
+    }
+
+    async uploadImage(file) {
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch('/admin/upload/image', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData,
+            });
+
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                if (response.status === 413) {
+                    return { url: null, message: 'Le serveur refuse ce fichier (HTTP 413). Reduis la taille de l image.' };
+                }
+
+                const serverMessage = payload?.message || '';
+                const fallback = `Erreur HTTP ${response.status} pendant le televersement.`;
+                return { url: null, message: serverMessage || fallback };
+            }
+
+            if (payload?.success !== 1 || !payload?.file?.url) {
+                return { url: null, message: payload?.message || 'Reponse invalide du serveur.' };
+            }
+
+            return { url: payload.file.url, message: null };
+        } catch (e) {
+            return { url: null, message: 'Erreur reseau pendant le televersement.' };
+        }
     }
 }

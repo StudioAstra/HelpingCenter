@@ -2,6 +2,7 @@
 
 namespace App\Controller\Front;
 
+use App\Entity\Article;
 use App\Entity\Section;
 use App\Entity\Subsection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,8 +22,14 @@ class SectionController extends AbstractController
             throw new NotFoundHttpException();
         }
 
+        $sectionArticles = $em->getRepository(Article::class)->findBy(
+            ['section' => $section, 'subsection' => null, 'isPublished' => true],
+            ['position' => 'ASC']
+        );
+
         return $this->render('front/section.html.twig', [
             'section' => $section,
+            'sectionArticles' => $sectionArticles,
         ]);
     }
 

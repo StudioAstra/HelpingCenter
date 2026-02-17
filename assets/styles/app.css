@@ -63,13 +63,42 @@
   }
 }
 
-/* Editor.js custom styles */
-.ce-block__content {
-  max-width: 100% !important;
+/* EasyMDE custom styles */
+.editor-toolbar {
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  opacity: 1;
+  background: transparent;
 }
 
-.codex-editor__redactor {
-  padding-bottom: 100px !important;
+.editor-toolbar a {
+  color: rgba(45, 55, 72, 0.7) !important;
+}
+
+.editor-toolbar a:hover,
+.editor-toolbar a.active {
+  background: rgba(99, 91, 255, 0.1) !important;
+  border-color: rgba(99, 91, 255, 0.2) !important;
+  color: #2d3748 !important;
+}
+
+.EasyMDEContainer .CodeMirror {
+  border: none;
+  background: transparent;
+  min-height: 320px;
+  color: #2d3748;
+  font-size: 0.9rem;
+}
+
+.EasyMDEContainer .CodeMirror-focused {
+  box-shadow: none;
+}
+
+.EasyMDEContainer .editor-statusbar {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  padding: 0.5rem 0.75rem;
+  color: var(--color-muted-foreground);
 }
 
 /* Article content rendering */
@@ -160,5 +189,5 @@
 
 /* TOC active state */
 .toc-link.active {
-  @apply text-blue-brand font-medium border-l-2 border-blue-brand;
+  @apply pl-2 text-blue-brand font-bold border-l-2 border-blue-brand;
 }

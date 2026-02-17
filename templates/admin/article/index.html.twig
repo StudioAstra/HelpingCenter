@@ -12,13 +12,19 @@
     {# En-tete avec bouton de creation #}
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-[#2d3748]">Articles</h2>
-        <a href="{{ path('admin_article_new') }}"
-           class="btn btn-primary inline-flex items-center gap-2 rounded-xl bg-[#635bff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
-            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            Nouvel article
-        </a>
+        <div class="flex items-center gap-3">
+            <a href="{{ path('admin_article_import') }}"
+               class="btn btn-outline inline-flex items-center gap-2 rounded-xl border border-[rgba(0,0,0,0.06)] px-4 py-2.5 text-sm font-semibold text-[#2d3748]/70 hover:bg-[#f0f4f8] hover:text-[#2d3748] transition-colors">
+                Importer ZIP
+            </a>
+            <a href="{{ path('admin_article_new') }}"
+               class="btn btn-primary inline-flex items-center gap-2 rounded-xl bg-[#635bff] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#635bff]/90 focus:outline-none focus:ring-2 focus:ring-[#635bff]/50 focus:ring-offset-2 transition-all">
+                <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                Nouvel article
+            </a>
+        </div>
     </div>
 
     {# Tableau des articles #}
@@ -43,10 +49,10 @@
                                 {{ article.title }}
                             </td>
                             <td class="px-6 py-4 text-[#2d3748]/60">
-                                {{ article.subsection.title }}
+                                {{ article.subsection ? article.subsection.title : '—' }}
                             </td>
                             <td class="px-6 py-4 text-[#2d3748]/60">
-                                {{ article.subsection.section.title }}
+                                {{ article.section.title }}
                             </td>
                             <td class="px-6 py-4">
                                 {% if article.isPublished %}
@@ -87,7 +93,11 @@
 
                                     {# Supprimer #}
                                     <form method="post" action="{{ path('admin_article_delete', { id: article.id }) }}"
-                                          onsubmit="return confirm('Supprimer cet article ? Cette action est irr&eacute;versible.');">
+                                          data-controller="confirm-modal"
+                                          data-action="submit->confirm-modal#confirm"
+                                          data-confirm-modal-title-value="Supprimer l'article"
+                                          data-confirm-modal-message-value="Supprimer cet article ? Cette action est irréversible."
+                                          data-confirm-modal-confirm-label-value="Supprimer">
                                         <input type="hidden" name="_token" value="{{ csrf_token('delete-article-' ~ article.id) }}">
                                         <button type="submit"
                                                 class="inline-flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
