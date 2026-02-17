@@ -111,6 +111,7 @@ class ArticleController extends AbstractController
         $plainText = $renderer->extractText($article->getContent());
         $headings = $renderer->extractHeadings($article->getContent());
         $readingTimeMinutes = $this->estimateReadingTimeMinutes($plainText);
+        [$freshnessLabel, $freshnessTone] = $this->buildFreshness($article);
 
         $feedbackRepo = $em->getRepository(ArticleFeedback::class);
         $helpfulCount = $feedbackRepo->count(['article' => $article, 'isHelpful' => true]);
@@ -155,6 +156,8 @@ class ArticleController extends AbstractController
             'htmlContent' => $htmlContent,
             'headings' => $headings,
             'readingTimeMinutes' => $readingTimeMinutes,
+            'freshnessLabel' => $freshnessLabel,
+            'freshnessTone' => $freshnessTone,
             'helpfulCount' => $helpfulCount,
             'notHelpfulCount' => $notHelpfulCount,
             'siblings' => $siblings,
@@ -300,5 +303,26 @@ class ArticleController extends AbstractController
         $ascii = preg_replace('/[^a-z0-9]+/', '-', $ascii) ?? '';
 
         return trim($ascii, '-');
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    private function buildFreshness(Article $article): array
+    {
+        $updatedAt = $article->getUpdatedAt();
+        if (!$updatedAt) {
+            return ['Date inconnue', 'warning'];
+        }
+
+        $days = (int) $updatedAt->diff(new \DateTimeImmutable())->format('%a');
+        if ($days <= 30) {
+            return ['À jour', 'fresh'];
+        }
+        if ($days <= 90) {
+            return ['À vérifier', 'warning'];
+        }
+
+        return ['Possiblement obsolète', 'stale'];
     }
 }

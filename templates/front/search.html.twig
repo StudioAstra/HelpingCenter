@@ -12,10 +12,10 @@
 
 {# ── Search Header ── #}
 <section class="mx-auto max-w-4xl px-4 pt-8 pb-4">
-    <h1 class="font-satoshi text-3xl font-extrabold text-[#2d3748]">Résultats de recherche</h1>
+    <h1 class="font-satoshi text-3xl font-extrabold text-[#1f2937]">Résultats de recherche</h1>
 
     {% if query %}
-        <p class="mt-2 text-base text-[#2d3748]/60">
+        <p class="mt-2 text-base text-[#2d3748]/80">
             Recherche pour « <span class="font-semibold text-[#2d3748]">{{ query }}</span> »
         </p>
     {% endif %}
@@ -33,7 +33,7 @@
                 name="q"
                 value="{{ query }}"
                 placeholder="Rechercher dans le centre d'aide..."
-                class="w-full rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white py-4 pl-12 pr-4 text-[#2d3748] shadow-sm placeholder:text-[#2d3748]/40 focus:outline-none focus:ring-2 focus:ring-[#635bff]/40"
+                class="w-full rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white py-4 pl-12 pr-4 text-[#1f2937] shadow-sm placeholder:text-[#2d3748]/55 focus:outline-none focus:ring-2 focus:ring-[#635bff]/40"
             />
         </div>
     </form>
@@ -43,7 +43,7 @@
 <section class="mx-auto max-w-4xl px-4 py-8">
     {% if results is defined and results|length > 0 %}
         {# Result Count #}
-        <p class="mb-6 text-sm font-medium text-[#2d3748]/50">
+        <p class="mb-6 text-sm font-medium text-[#2d3748]/70">
             {{ results|length }} résultat{{ results|length > 1 ? 's' : '' }} trouvé{{ results|length > 1 ? 's' : '' }}
         </p>
 
@@ -54,7 +54,7 @@
                 <a href="{{ subsection
                     ? path('front_article', {sectionSlug: section.slug, subsectionSlug: subsection.slug, articleSlug: result.slug})
                     : path('front_article_section', {sectionSlug: section.slug, articleSlug: result.slug}) }}"
-                   class="group block rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                   class="group block rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                     <div class="flex items-start gap-4">
                         {# Document Icon #}
                         <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#635bff]/10 text-[#635bff]">
@@ -65,12 +65,12 @@
 
                         <div class="min-w-0 flex-1">
                             {# Article Title #}
-                            <h2 class="font-satoshi text-lg font-bold text-[#2d3748] group-hover:text-[#635bff]">
+                            <h2 class="font-satoshi text-lg font-bold text-[#1f2937] group-hover:text-[#635bff]">
                                 {{ result.title }}
                             </h2>
 
                             {# Section > Subsection Path #}
-                            <p class="mt-1 flex items-center gap-1 text-xs text-[#2d3748]/40">
+                            <p class="mt-1 flex items-center gap-1 text-xs text-[#2d3748]/65">
                                 <span>{{ section.title }}</span>
                                 {% if subsection %}
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -82,12 +82,12 @@
 
                             {# Preview #}
                             {% if result.excerpt is defined and result.excerpt %}
-                                <p class="mt-2 text-sm text-[#2d3748]/60">{{ result.excerpt }}</p>
+                                <p class="mt-2 text-sm text-[#2d3748]/80">{{ result.excerpt }}</p>
                             {% endif %}
                         </div>
 
                         {# Arrow #}
-                        <span class="shrink-0 text-[#2d3748]/20 transition group-hover:text-[#635bff]">
+                        <span class="shrink-0 text-[#2d3748]/45 transition group-hover:text-[#635bff]">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                             </svg>
@@ -104,10 +104,17 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 4.5 12a7.5 7.5 0 0 0 12.15 4.65z"/>
                 </svg>
             </div>
-            <p class="text-lg text-[#2d3748]/50">
+            <p class="text-lg text-[#2d3748]/75">
                 Aucun résultat trouvé pour « <span class="font-semibold text-[#2d3748]">{{ query }}</span> ».
             </p>
-            <p class="mt-1 text-sm text-[#2d3748]/40">Essayez d'autres termes.</p>
+            <p class="mt-1 text-sm text-[#2d3748]/65">Essayez d'autres termes.</p>
+            {% if suggestion is defined and suggestion %}
+                <p class="mt-3 text-sm text-[#2d3748]/80">
+                    Voulez-vous dire
+                    <a href="{{ path('front_search', {q: suggestion}) }}"
+                       class="font-semibold text-[#635bff] hover:underline">« {{ suggestion }} »</a> ?
+                </p>
+            {% endif %}
         </div>
     {% endif %}
 </section>

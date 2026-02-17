@@ -45,6 +45,18 @@
             Vos commentaires nous aident a ameliorer notre documentation.
         </p>
 
+        <div class="mb-3">
+            <label class="block text-xs font-medium text-[#2d3748]/70 mb-1">Raison principale</label>
+            <select data-feedback-target="reason"
+                    class="w-full rounded-xl border border-[rgba(0,0,0,0.10)] bg-white px-3 py-2 text-sm text-[#2d3748] focus:outline-none focus:ring-2 focus:ring-[#635bff]/30">
+                <option value="">Sélectionner une raison (optionnel)</option>
+                <option value="Pas assez clair">Pas assez clair</option>
+                <option value="Informations incomplètes">Informations incomplètes</option>
+                <option value="Informations obsolètes">Informations obsolètes</option>
+                <option value="Mon cas n'est pas couvert">Mon cas n'est pas couvert</option>
+            </select>
+        </div>
+
         <textarea
             rows="3"
             placeholder="Decrivez ce qui pourrait etre ameliore..."

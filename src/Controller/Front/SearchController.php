@@ -16,10 +16,15 @@ class SearchController extends AbstractController
     {
         $query = $request->query->get('q', '');
         $results = $searchService->search($query);
+        $suggestion = null;
+        if ($query !== '' && $results === []) {
+            $suggestion = $searchService->suggestQuery($query);
+        }
 
         return $this->render('front/search.html.twig', [
             'query' => $query,
             'results' => $results,
+            'suggestion' => $suggestion,
         ]);
     }
 
