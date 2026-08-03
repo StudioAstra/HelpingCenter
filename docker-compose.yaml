@@ -1,0 +1,32 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile.prod
+      target: app
+    environment:
+      APP_ENV: prod
+    restart: unless-stopped
+    networks:
+      app:
+      coolify:
+        aliases:
+          - helpingcenter-php
+          
+  nginx:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile.prod
+      target: nginx
+    depends_on:
+      - php
+    restart: unless-stopped
+    networks:
+      - app
+      - coolify
+
+networks:
+  app:
+    driver: bridge
+  coolify:
+    external: true
