@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile.prod
+      target: app
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - database
+    networks:
+      coolify:
+        aliases:
+          - helpingcenter-php
+
+  nginx:
+    build:
+      context: .
+      dockerfile: .docker/php/Dockerfile.prod
+      target: nginx
+    restart: unless-stopped
+    depends_on:
+      - php
+    networks:
+      - coolify
+    labels:
+      - "traefik.enable=true"
+
+  database:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-helpingcenter}
+      MYSQL_USER: ${MYSQL_USER:-helpingcenter}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - coolify
+
+volumes:
+  db_data:
+
+networks:
+  coolify:
+    external: true
