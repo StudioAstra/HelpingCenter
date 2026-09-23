@@ -5,7 +5,8 @@ public/build/
 .git/
 .env.local
 .env.*.local
-docker/nginx/
-compose.yaml
-compose.override.yaml
+docker/nginx/Dockerfile
+docker/nginx/default.conf
+docker-compose.yaml
+docker-compose.override.yaml
 PLAN.md

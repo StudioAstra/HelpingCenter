@@ -2,38 +2,64 @@ services:
   php:
     build:
       context: .
-      dockerfile: docker/php/Dockerfile
-    volumes:
-      - .:/var/www/html
-      - php_vendor:/var/www/html/vendor
-      - php_var:/var/www/html/var
+      dockerfile: docker/php/Dockerfile.prod
+      target: php
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
     depends_on:
       database:
         condition: service_healthy
     environment:
-      DATABASE_URL: "mysql://helpcenter:helpcenter@database:3306/helpcenter?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
-      APP_ENV: dev
-      APP_SECRET: "change-me-in-production"
+      DATABASE_URL: "mysql://helpcenter:${DB_PASSWORD}@database:3306/helpcenter?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+      APP_ENV: prod
+      APP_SECRET: "${APP_SECRET}"
+    volumes:
+      - php_var:/var/www/html/var
+      - uploads:/var/www/html/public/uploads
+    networks:
+      app:
+      coolify:
+        aliases:
+          - ${PHP_ALIAS}
 
   nginx:
     build:
-      context: docker/nginx
-    ports:
-      - "${APP_PORT:-8080}:80"
-    volumes:
-      - ./public:/var/www/html/public:ro
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+      target: nginx
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:80/"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     depends_on:
-      - php
+      php:
+        condition: service_healthy
+    environment:
+      PHP_UPSTREAM: ${PHP_ALIAS}
+    volumes:
+      - uploads:/usr/share/nginx/html/uploads
+    labels:
+      - traefik.docker.network=coolify
+    networks:
+      - app
+      - coolify
 
   database:
     image: mariadb:10.11
+    restart: unless-stopped
     environment:
-      MARIADB_ROOT_PASSWORD: root
+      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
       MARIADB_DATABASE: helpcenter
       MARIADB_USER: helpcenter
-      MARIADB_PASSWORD: helpcenter
-    ports:
-      - "${DB_PORT:-3306}:3306"
+      MARIADB_PASSWORD: "${DB_PASSWORD}"
     volumes:
       - database_data:/var/lib/mysql
     healthcheck:
@@ -41,6 +67,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - app
 
   node:
     image: node:20-alpine
@@ -52,8 +80,14 @@ services:
     profiles:
       - build
 
+networks:
+  app:
+    driver: bridge
+  coolify:
+    external: true
+
 volumes:
   database_data:
-  php_vendor:
   php_var:
+  uploads:
   node_modules:

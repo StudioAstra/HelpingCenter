@@ -1,5 +1,36 @@
 services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    environment:
+      APP_ENV: dev
+      APP_SECRET: "dev-secret-change-me"
+      DATABASE_URL: "mysql://helpcenter:helpcenter@database:3306/helpcenter?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
+    volumes:
+      - .:/var/www/html
+      - php_vendor:/var/www/html/vendor
+      - php_var:/var/www/html/var
+
+  nginx:
+    build:
+      context: docker/nginx
+    volumes:
+      - ./public:/var/www/html/public:ro
+    ports:
+      - "${APP_PORT:-8080}:80"
+
+  database:
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_PASSWORD: helpcenter
+    ports:
+      - "${DB_PORT:-3306}:3306"
+
   # In dev, run Webpack watch for live asset rebuilds
   node:
     command: sh -c "npm install && npm run watch"
     profiles: []
+
+volumes:
+  php_vendor:

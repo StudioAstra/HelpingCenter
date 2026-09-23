@@ -1,0 +1,53 @@
+FROM composer:2 AS composer
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-scripts \
+    --no-progress \
+    --no-interaction \
+    --prefer-dist \
+    --no-autoloader
+
+FROM node:20-alpine AS node
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY . .
+COPY --from=composer /app/vendor ./vendor
+RUN npm run build
+
+FROM php:8.4-fpm-alpine AS php
+RUN --mount=type=cache,target=/php-ext-cache,id=helpcenter-php-ext \
+    PHP_EXT_DIR=$(php-config --extension-dir); \
+    if [ -f /php-ext-cache/intl.so ]; then \
+        echo "==> Using cached PHP extensions"; \
+        apk add --no-cache icu-libs libzip netcat-openbsd; \
+        cp /php-ext-cache/*.so "$PHP_EXT_DIR/"; \
+        docker-php-ext-enable intl opcache pdo_mysql zip; \
+    else \
+        echo "==> Building PHP extensions (cache miss)"; \
+        apk add --no-cache icu-dev libzip-dev linux-headers netcat-openbsd $PHPIZE_DEPS; \
+        docker-php-ext-install intl opcache pdo_mysql zip; \
+        cp "$PHP_EXT_DIR"/*.so /php-ext-cache/; \
+    fi; \
+    rm -rf /tmp/pear /usr/src/php/ext
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+WORKDIR /var/www/html
+RUN mkdir -p var/cache var/log \
+    && chown -R www-data:www-data var
+COPY --chown=www-data:www-data . .
+COPY --chown=www-data:www-data --from=composer /app/vendor ./vendor
+ENV COMPOSER_ALLOW_SUPERUSER=1
+RUN composer dump-autoload --optimize --no-dev
+COPY --chown=www-data:www-data --from=node /app/public/build ./public/build
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+EXPOSE 9000
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["php-fpm"]
+
+FROM nginx:1.25-alpine AS nginx
+COPY docker/nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=node /app/public /usr/share/nginx/html
+EXPOSE 80
