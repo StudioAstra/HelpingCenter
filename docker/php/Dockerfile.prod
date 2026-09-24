@@ -56,6 +56,6 @@ CMD ["php-fpm"]
 FROM nginx:1.25-alpine AS nginx
 
 COPY docker/nginx/default.prod.conf /etc/nginx/conf.d/default.conf
-COPY --from=assets /app/public /usr/share/nginx/html
+COPY --from=app /var/www/html/public /usr/share/nginx/html
 
 EXPOSE 80
