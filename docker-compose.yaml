@@ -22,10 +22,7 @@ services:
       - php_var:/var/www/html/var
       - uploads:/var/www/html/public/uploads
     networks:
-      app:
-      coolify:
-        aliases:
-          - ${PHP_ALIAS}
+      - app
 
   nginx:
     build:
@@ -43,7 +40,7 @@ services:
       php:
         condition: service_healthy
     environment:
-      PHP_UPSTREAM: ${PHP_ALIAS}
+      PHP_UPSTREAM: php
     volumes:
       - uploads:/usr/share/nginx/html/uploads
     labels:
