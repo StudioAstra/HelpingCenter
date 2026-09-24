@@ -11,11 +11,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 120s
-    depends_on:
-      database:
-        condition: service_healthy
     environment:
-      DATABASE_URL: "mysql://helpcenter:${DB_PASSWORD}@database:3306/helpcenter?serverVersion=10.11.2-MariaDB&charset=utf8mb4"
       APP_ENV: prod
       APP_SECRET: "${APP_SECRET}"
     volumes:
@@ -23,6 +19,7 @@ services:
       - uploads:/var/www/html/public/uploads
     networks:
       - app
+      - coolify
 
   nginx:
     build:
@@ -42,38 +39,12 @@ services:
     volumes:
       - uploads:/usr/share/nginx/html/uploads
     labels:
+      - traefik.enable=true
       - traefik.docker.network=coolify
+      - traefik.http.services.helpcenter.loadbalancer.server.port=80
     networks:
       - app
       - coolify
-
-  database:
-    image: mariadb:10.11
-    restart: unless-stopped
-    environment:
-      MARIADB_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-      MARIADB_DATABASE: default
-      MARIADB_USER: studioastra_help
-      MARIADB_PASSWORD: "${DB_PASSWORD}"
-    volumes:
-      - database_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      timeout: 5s
-      retries: 10
-      start_period: 30s
-    networks:
-      - app
-
-  node:
-    image: node:20-alpine
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-      - node_modules:/var/www/html/node_modules
-    command: sh -c "npm install && npm run build"
-    profiles:
-      - build
 
 networks:
   app:
@@ -82,7 +53,6 @@ networks:
     external: true
 
 volumes:
-  database_data:
   php_var:
   uploads:
   node_modules:
