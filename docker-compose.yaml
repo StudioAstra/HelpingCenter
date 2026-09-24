@@ -40,6 +40,13 @@ services:
       - uploads:/usr/share/nginx/html/uploads
     labels:
       - traefik.docker.network=coolify
+      - traefik.http.services.helpcenter-nginx.loadbalancer.server.port=80
+      - "traefik.http.routers.helpcenter-https.rule=Host(`help.getstudioastra.fr`)"
+      - traefik.http.routers.helpcenter-https.entrypoints=https
+      - traefik.http.routers.helpcenter-https.tls=true
+      - traefik.http.routers.helpcenter-https.tls.certresolver=letsencrypt
+      - traefik.http.routers.helpcenter-https.service=helpcenter-nginx
+      - traefik.http.routers.helpcenter-https.priority=100
     networks:
       - app
       - coolify
