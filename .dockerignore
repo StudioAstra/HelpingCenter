@@ -7,6 +7,7 @@ public/build/
 .env.*.local
 docker/nginx/Dockerfile
 docker/nginx/default.conf
+docker/nginx/default.conf.template
 docker-compose.yaml
 docker-compose.override.yaml
 PLAN.md

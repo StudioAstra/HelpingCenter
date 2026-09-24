@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/php/Dockerfile.prod
-      target: php
+      target: app
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "nc", "-z", "127.0.0.1", "9000"]
@@ -39,8 +39,6 @@ services:
     depends_on:
       php:
         condition: service_healthy
-    environment:
-      PHP_UPSTREAM: php
     volumes:
       - uploads:/usr/share/nginx/html/uploads
     labels:
