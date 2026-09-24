@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 echo "==> entrypoint.sh start (APP_ENV=${APP_ENV:-dev})"
 
@@ -30,13 +29,21 @@ done
 echo "    Database ready."
 
 echo "==> Running migrations..."
-php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration && echo "    Migrations OK." || { echo "    ERROR: migrations failed"; exit 1; }
+if php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration 2>&1; then
+    echo "    Migrations OK."
+else
+    echo "!!! ERROR: migrations failed (see above) !!!"
+fi
 
 echo "==> Clearing cache..."
-php bin/console cache:clear --no-warmup --no-debug && echo "    Cache cleared." || { echo "    ERROR: cache:clear failed"; exit 1; }
+if php bin/console cache:clear --no-warmup --no-debug 2>&1; then
+    echo "    Cache cleared."
+else
+    echo "!!! ERROR: cache:clear failed (see above) !!!"
+fi
 
 echo "==> Setting permissions..."
 chown -R www-data:www-data var/ 2>/dev/null || true
 
-echo "==> Ready! Starting PHP-FPM..."
+echo "==> Starting PHP-FPM..."
 exec "$@"
