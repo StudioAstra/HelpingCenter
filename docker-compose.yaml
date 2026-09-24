@@ -46,7 +46,11 @@ services:
       - traefik.http.routers.helpcenter-https.tls=true
       - traefik.http.routers.helpcenter-https.tls.certresolver=letsencrypt
       - traefik.http.routers.helpcenter-https.service=helpcenter-nginx
-      - traefik.http.routers.helpcenter-https.priority=100
+      - traefik.http.routers.helpcenter-https.priority=99999
+      - "traefik.http.routers.helpcenter-http.rule=Host(`help.getstudioastra.fr`)"
+      - traefik.http.routers.helpcenter-http.entrypoints=http
+      - traefik.http.routers.helpcenter-http.middlewares=redirect-to-https
+      - traefik.http.routers.helpcenter-http.priority=99999
     networks:
       - app
       - coolify
